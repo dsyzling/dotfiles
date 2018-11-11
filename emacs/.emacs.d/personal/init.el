@@ -92,16 +92,16 @@
                              "~/Dropbox/home/org/todo/garch.org"
                              ))
 
-
 (setq org-agenda-custom-commands
       '(("p" "Projects" tags "PROJECT" nil)
-        ("d" "Day's Agenda" agenda "" ((org-agenda-ndays 1)))
+        ("d" "Day's Agenda" agenda ""
+         ((org-agenda-span 1)))
         ("w" "Waiting Tasks"  ((tags-todo "WAITING")))
         ("r" "Studying Tasks/Research"
          ((tags-todo "study")
           ))
         ("c" "Completed Tasks" todo "DONE" nil)
-        ("v" "21 day view" agenda "" ((org-agenda-ndays 21)))
+        ("v" "21 day view" agenda "" ((org-agenda-span 21)))
         ("u" "Unscheduled tasks" todo "TODO"
          ((org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled 'deadline))))))
 
