@@ -9,6 +9,9 @@
 
 (setq ns-use-srgb-colorspace t)
 
+;; Use helm for buffer switching
+(global-set-key (kbd "C-x b") 'helm-mini)
+
 ;; add melpa stable to our package archives
 (add-to-list 'package-archives
              '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/") t)
