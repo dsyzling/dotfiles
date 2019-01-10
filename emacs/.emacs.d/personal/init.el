@@ -9,6 +9,9 @@
 
 (setq ns-use-srgb-colorspace t)
 
+;; Use helm mode everywhere
+(helm-mode 1)
+
 ;; Use helm for buffer switching
 (global-set-key (kbd "C-x b") 'helm-mini)
 (global-set-key (kbd "C-x C-f") 'helm-find-files)
