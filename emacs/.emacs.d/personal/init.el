@@ -5,6 +5,8 @@
 ;;;   git checkout master
 ;;;   git merge upstream/master
 
+(prelude-require-packages '(use-package))
+
 (setq ns-use-srgb-colorspace t)
 
 ;; add melpa stable to our package archives
@@ -29,16 +31,20 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Linux customisations
 (when (eq system-type 'gnu/linux)
-  ;; (set-face-attribute 'default
-  ;;                     nil
-  ;;                     :font "Inconsolata"
-  ;;                     :height 135
-  ;;                     :weight 'bold)
   (set-face-attribute 'default
                       nil
-                      :font "Menlo"
+                      :font "Inconsolata"
                       :height 120
                       :weight 'bold)
+  ;; Use google-chrome-stable as our default browser
+  (setq browse-url-browser-function 'browse-url-generic
+        browse-url-generic-program "google-chrome-stable")
+  
+  ;; (set-face-attribute 'default
+  ;;                     nil
+  ;;                     :font "Menlo"
+  ;;                     :height 120
+  ;;                     :weight 'bold)
   
   )
 
@@ -190,11 +196,12 @@
 ;; our custom twlight colour theme
 ;;(require 'color-theme-twilight-ds)
 ;;(color-theme-twilight-ds)
-
+;; For now we're just setting a different background colour - we will
+;; be modifying our theme template in time.
+;; Background matches default vscode template.
+(set-background-color "#1E1E1E")
 
 ;; Cider/Clojure customisation
-
-
 (add-hook 'cider-repl-mode-hook 'paredit-mode)
 (add-hook 'cider-mode-hook 'paredit-mode)
 
@@ -236,9 +243,6 @@
 ;; (define-key cider-mode-map (kbd "C-c r") 'cider-repl-reset)
 ;; (define-key cider-mode-map (kbd "C-c .") 'cider-reset-test-run-tests)
 
-
-(prelude-require-packages '(use-package))
-
 ;; Scala/ensime
 ;; http://ensime.github.io/editors/emacs/install/
 (use-package ensime
@@ -263,7 +267,6 @@
 (add-to-list 'auto-mode-alist '("\\.php$" . php-mode))
 (add-to-list 'auto-mode-alist '("\\.inc$" . php-mode))
 
-
 ;; GPG 2.2.x - now uses pinentry with a different interface - this change allows
 ;; mini buffer entry of the passphrase
 ;;  https://colinxy.github.io/software-installation/2016/09/24/emacs25-easypg-issue.html
@@ -273,3 +276,38 @@
 ;; share amongst machines
 (setq gnus-init-file "~/Dropbox/home/gnus/.gnus.el")
 (setq gnus-startup-file "~/Dropbox/home/gnus/.newsrc")
+
+;;
+;; Company mode customisation
+;; Company-box - icons for company mode
+;;
+(prelude-require-packages '(company-box))
+(require 'company-box)
+(add-hook 'company-mode-hook 'company-box-mode)
+
+;; Reduce company idle delay for completion
+(setq company-idle-delay 0.3)
+
+;; Company colour customisation
+(require 'color)
+(let ((bg (face-attribute 'default :background)))
+  (custom-set-faces
+   `(company-tooltip ((t (:inherit default :background ,(color-lighten-name bg 2)))))
+   `(company-scrollbar-bg ((t (:background ,(color-lighten-name bg 10)))))
+   `(company-scrollbar-fg ((t (:background ,(color-lighten-name bg 5)))))
+   `(company-tooltip-selection ((t (:inherit font-lock-function-name-face))))
+   `(company-tooltip-common ((t (:inherit font-lock-constant-face))))))
+
+;;
+;; Python development configuration, company-jedi for completion.
+;;
+;; DS temporarily removed - testing lsp-mode
+;; If lsp completion fails - consider using company-jedi:
+;;  (prelude-require-packages '(elpy company-jedi))
+;;
+(load "~/.emacs.d/personal/modules/ds-python.el")
+(require 'ds-python)
+
+;; Render pdfs in docview at a higher resolution to improve font quality.
+;; changing this variable may require you to call docview-clear-cache
+(setq doc-view-resolution 300)
