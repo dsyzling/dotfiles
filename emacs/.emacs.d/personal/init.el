@@ -11,6 +11,7 @@
 
 ;; Use helm for buffer switching
 (global-set-key (kbd "C-x b") 'helm-mini)
+(global-set-key (kbd "C-x C-f") 'helm-find-files)
 
 ;; add melpa stable to our package archives
 (add-to-list 'package-archives
