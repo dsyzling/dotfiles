@@ -250,18 +250,6 @@
 ;; (define-key cider-mode-map (kbd "C-c r") 'cider-repl-reset)
 ;; (define-key cider-mode-map (kbd "C-c .") 'cider-reset-test-run-tests)
 
-;; Scala/ensime
-;; http://ensime.github.io/editors/emacs/install/
-(use-package ensime
-  :ensure t
-  :pin melpa)
-
-(use-package sbt-mode
-  :pin melpa)
-
-(use-package scala-mode
-  :pin melpa)
-
 ;; Racket/Geiser customisation
 
 ;; allow C-c C-c to eval current definition - same as M-C-x
@@ -304,6 +292,12 @@
    `(company-scrollbar-fg ((t (:background ,(color-lighten-name bg 5)))))
    `(company-tooltip-selection ((t (:inherit font-lock-function-name-face))))
    `(company-tooltip-common ((t (:inherit font-lock-constant-face))))))
+
+;;
+;; Scala development configuration
+;;
+(load "~/.emacs.d/personal/modules/ds-scala.el")
+(require 'ds-scala)
 
 ;;
 ;; Python development configuration, company-jedi for completion.
