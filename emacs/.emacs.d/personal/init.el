@@ -208,47 +208,6 @@
 ;; Background matches default vscode template.
 (set-background-color "#1E1E1E")
 
-;; Cider/Clojure customisation
-(add-hook 'cider-repl-mode-hook 'paredit-mode)
-(add-hook 'cider-mode-hook 'paredit-mode)
-
-;; these should be enabled by prelude by default - but might be useful
-;; for other scheme and lisp modes.
-;;(add-hook 'cider-repl-mode-hook 'subword-mode)
-;;(add-hook 'cider-repl-mode-hook 'company-mode)
-;;(add-hook 'cider-mode-hook 'company-mode)
-
-(defun cider-repl-command (cmd)
-  "Execute commands on the cider repl"
-  (cider-switch-to-repl-buffer)
-  (goto-char (point-max))
-  (insert cmd)
-  (cider-repl-return)
-  (cider-switch-to-last-clojure-buffer))
-
-(defun cider-repl-reset ()
-  "Assumes reloaded + tools.namespace is used to reload everything"
-  (interactive)
-  (save-some-buffers)
-  (cider-repl-command "(user/reset)"))
-
-(defun cider-reset-test-run-tests ()
-  (interactive)
-  (cider-repl-reset)
-  (cider-test-run-tests))
-
-;; some repl tweaks
-(setq cider-repl-use-clojure-font-lock t)
-(add-hook 'cider-repl-mode-hook 'paredit-mode)
-(add-hook 'cider-repl-mode-hook 'rainbow-delimiters-mode)
-
-;; clojure cheat sheet bind to meta-f1
-(prelude-require-packages '(clojure-cheatsheet))
-(add-hook 'clojure-mode-hook
-          (lambda () (local-set-key [M-f1] 'clojure-cheatsheet)))
-
-;; (define-key cider-mode-map (kbd "C-c r") 'cider-repl-reset)
-;; (define-key cider-mode-map (kbd "C-c .") 'cider-reset-test-run-tests)
 
 ;; Racket/Geiser customisation
 
@@ -292,6 +251,12 @@
    `(company-scrollbar-fg ((t (:background ,(color-lighten-name bg 5)))))
    `(company-tooltip-selection ((t (:inherit font-lock-function-name-face))))
    `(company-tooltip-common ((t (:inherit font-lock-constant-face))))))
+
+;;
+;; Clojure/Clojurescript development configuration
+;;
+(load "~/.emacs.d/personal/modules/ds-clojure.el")
+(require 'ds-clojure)
 
 ;;
 ;; Scala development configuration
