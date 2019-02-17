@@ -30,7 +30,7 @@
 (use-package ensime
   :ensure t
   :config
-  (setq ensime-sbt-perform-on-save "test:compile")
+  ;;(setq ensime-sbt-perform-on-save "test:compile")
   :bind (:map ensime-mode-map
               ("C-c C-t" . ensime-sbt-do-test-only-dwim)
               ("C-c C-d" . ensime-show-doc-for-symbol-at-point)
@@ -44,7 +44,15 @@
 (use-package sbt-mode
   :pin melpa)
 
+;; Override default indenting rules allow parameters to indented/aligned
+;; See the following for further options:
+;;  http://ensime.github.io/editors/emacs/scala-mode/
+;;
+;; We may also want to consider aligning forms:
+;; (setq scala-indent:align-forms t)
 (use-package scala-mode
+  :config
+  (setq scala-indent:align-parameters t)
   :pin melpa)
 
 (require 'ensime-sbt)
