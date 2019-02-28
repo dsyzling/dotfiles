@@ -72,5 +72,20 @@
 
 (advice-add 'ensime-sbt :after #'ds/ensime-sbt-ansi-color-workaround)
 
+;;
+;; Run the command App extended class within the current buffer
+;; using sbt runMain.
+;;
+
+(defun ensime-sbt-runMain-current ()
+  "Execute the sbt `runMain' command for the project and current
+object extending App within the current source test file."
+  (interactive)
+  (let* ((impl-class
+          (or (ensime-top-level-class-closest-to-point)
+              (return (message "Could not find top-level class"))))
+         (cleaned-class (replace-regexp-in-string "<empty>\\." "" impl-class))
+         (command (concat "runMain" " " cleaned-class)))
+    (sbt:command command)))
 
 (provide 'ds-scala)
