@@ -57,6 +57,17 @@
 
 (require 'ensime-sbt)
 
+;; When in comment blocks - return should automatically add an
+;; asterisk and indent.
+(defun scala-mode-newline-comments ()
+  "Custom newline appropriate for `scala-mode'."
+  ;; shouldn't this be in a post-insert hook?
+  (interactive)
+  (newline-and-indent)
+  (scala-indent:insert-asterisk-on-multiline-comment))
+
+(bind-key "RET" 'scala-mode-newline-comments scala-mode-map)
+
 ;;
 ;; When activating an ensime project for the first time -
 ;; run M-x ensime-sbt. This will activate sbt and setup
