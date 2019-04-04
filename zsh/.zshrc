@@ -1,8 +1,11 @@
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
+# start tmux automatically
+export ZSH_TMUX_AUTOSTART=true
+
 # Path to your oh-my-zsh installation.
-  export ZSH="/home/dsyzling/.oh-my-zsh"
+export ZSH="/home/dsyzling/.oh-my-zsh"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -63,7 +66,7 @@ ZSH_THEME="robbyrussell"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-  git
+    git tmux
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -96,3 +99,30 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+# Arch Tilix - enable customisation of vte
+# Discussed here: https://gnunn1.github.io/tilix-web/manual/vteconfig/
+if [ $TILIX_ID ] || [ $VTE_VERSION ]; then
+    source /etc/profile.d/vte.sh
+fi
+
+
+# Virtualenvwrapper support for Python
+source /usr/bin/virtualenvwrapper.sh 
+
+# pip should only run if there is a virtualenv currently activated
+export PIP_REQUIRE_VIRTUALENV=true
+
+# create commands to override pip restriction.
+# use `gpip` or `gpip3` to force installation of
+# a package in the global python environment
+gpip(){
+    PIP_REQUIRE_VIRTUALENV="" pip "$@"
+}
+gpip3(){
+    PIP_REQUIRE_VIRTUALENV="" pip3 "$@"
+}
+
+# opt out of dotnet telemetry being sent to MS
+export DOTNET_CLI_TELEMETRY_OPTOUT=true
+
