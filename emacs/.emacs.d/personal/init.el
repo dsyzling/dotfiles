@@ -30,10 +30,12 @@
 ;(desktop-save-mode 1)
 
 (when (eq system-type 'windows-nt)
-    (set-face-font 'default "-outline-Consolas-bold-r-normal-normal-15-112-96-96-c-*-iso8859-1")
-  ;; use cygwin find on windows with grep and windows cmd console.
-  ;;(setq grep-find-template "c:\\cygwin\\bin\\find . <X> -type f <F> -exec grep <C> -n <R> {} NUL \";\"")
-    )
+  ;;(set-face-font 'default "-outline-Consolas-bold-r-normal-normal-15-112-96-96-c-*-iso8859-1")
+  (set-face-attribute 'default
+                      nil
+                      :font "Consolas"
+                      :height 110
+                      :weight 'bold))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Linux customisations
@@ -251,6 +253,24 @@
    `(company-scrollbar-fg ((t (:background ,(color-lighten-name bg 5)))))
    `(company-tooltip-selection ((t (:inherit font-lock-function-name-face))))
    `(company-tooltip-common ((t (:inherit font-lock-constant-face))))))
+
+;;
+;; use lsp-mode for scala, python etc.
+;;
+;; Enable nice rendering of diagnostics like compile errors.
+(use-package flycheck
+  :init (global-flycheck-mode))
+
+(use-package lsp-mode
+  :init (setq lsp-prefer-flymake nil))
+
+(use-package lsp-ui
+  :hook (lsp-mode . lsp-ui-mode)
+  ;;:init (setq lsp-scala-server-command "~/utils/metals-emacs")
+  )
+
+(use-package helm-lsp
+  :ensure t)
 
 ;;
 ;; add our modules directory to loadpath

@@ -72,18 +72,6 @@
 ;;
 (load "bloop.el")
 
-;; Enable nice rendering of diagnostics like compile errors.
-(use-package flycheck
-  :init (global-flycheck-mode))
-
-(use-package lsp-mode
-  :init (setq lsp-prefer-flymake nil))
-
-(use-package lsp-ui
-  :hook (lsp-mode . lsp-ui-mode)
-  ;;:init (setq lsp-scala-server-command "~/utils/metals-emacs")
-  )
-
 (use-package lsp-scala
   :after scala-mode
   :demand t
@@ -93,6 +81,8 @@
   ;; Bloop tries to compile the .#temp files used for interlock
   ;; so we disable interlocking - unfortunately this is global.
   (setq create-lockfiles nil)
+  (when (eq system-type 'windows-nt)
+    (setq lsp-scala--server-command "metals-emacs.bat"))
   :bind (:map scala-mode-map
               ("C-c C-f" . helm-projectile-find-file)
               ("C-c C-t" . bloop-test-only)
