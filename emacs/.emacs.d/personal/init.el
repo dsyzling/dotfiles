@@ -253,15 +253,18 @@
    `(company-tooltip-common ((t (:inherit font-lock-constant-face))))))
 
 ;;
+;; add our modules directory to loadpath
+;;
+(add-to-list 'load-path (concat(file-name-directory load-file-name) "modules"))
+
+;;
 ;; Clojure/Clojurescript development configuration
 ;;
-(load "~/.emacs.d/personal/modules/ds-clojure.el")
 (require 'ds-clojure)
 
 ;;
 ;; Scala development configuration
 ;;
-(load "~/.emacs.d/personal/modules/ds-scala.el")
 (require 'ds-scala)
 
 ;;
@@ -271,7 +274,6 @@
 ;; If lsp completion fails - consider using company-jedi:
 ;;  (prelude-require-packages '(elpy company-jedi))
 ;;
-(load "~/.emacs.d/personal/modules/ds-python.el")
 (require 'ds-python)
 
 ;; Render pdfs in docview at a higher resolution to improve font quality.
