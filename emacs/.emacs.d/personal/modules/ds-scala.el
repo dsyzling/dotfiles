@@ -23,7 +23,7 @@
 ;;; it was added to avoid ansi codes being displayed inside sbt mode.
 ;;;
 ;;; Code:
-
+(require 'seq)
 
 ;; (use-package sbt-mode
 ;;   :pin melpa)
@@ -101,14 +101,51 @@
 ;;
 (require 'ensime-inf)
 
+;; Work in progress - query type at point
+
+(defun lsp--scala-symbol-info-to-type (symbol)
+  (let* ((location (gethash "location" symbol))
+         (uri (gethash "uri" location))
+         (container-name (gethash "containerName" symbol))
+         (name (gethash "name" symbol))
+         )
+    ;; return plist with details
+    `(name ,name namespace ,container-name path ,(lsp--uri-to-path uri))))
+
+
+(defun lsp-scala-query-fully-qualified-name (type-name)
+  "Return the fully qualified type at the current cursor location."
+  (let* ((type-query type-name)
+         (current-file (buffer-file-name))
+         (symbol-results (lsp-request "workspace/symbol" `(:query ,type-query)))
+         (symbol-list (seq-map #'lsp--scala-symbol-info-to-type symbol-results))
+         )
+    ;; filter results to match filename of current buffer
+    (seq-filter (lambda (symbol-info)
+                  (string= (plist-get symbol-info 'path) current-file))
+                symbol-list)))
+
+
+;; Testing
+;; (progn
+;;   (set-buffer "TestMonadTransformers.scala")
+;;   ;;(seq-map #'lsp--scala-symbol-info-to-type tempr)
+;;   (let ((fqdn-seq (lsp-scala-query-fully-qualified-name "TestMonadTransformers")))
+;;     (let ((fqdn-name (car fqdn-seq)))
+;;       (concat (plist-get fqdn-name 'namespace) (plist-get fqdn-name 'name))))
+;;   ;;(lsp-scala-query-fully-qualified-name "TestMonadTransformers")
+;;   ;;(lsp-request "workspace/symbol" `(:query "TestMonadTransformers"))
+;;   )
+
 (defun ensime-top-level-class-closest-to-point ()
   "Return the name of first class, trait or object enclosing the point,
 or (if the point isn't inside a class definition) the class that follows
 the point. Return nil if no class can be found."
   ;; TODO use an RPC call instead of this cheesy search
+  (interactive)
   (cl-labels
       ((inside-string? () (nth 3 (syntax-ppss)))
-       (pos-of-top-level-class (&optional last-try)
+       (name-of-top-level-class (&optional last-try)
          (save-excursion
            (save-restriction
              (widen)
@@ -129,22 +166,30 @@ the point. Return nil if no class can be found."
                               scala-syntax:id-re
                               "\\)")))
                  (if (re-search-forward class-re nil t)
-                     (match-beginning 2)
+                     (match-string 2)
                    (unless last-try
-                     (pos-of-top-level-class t)))))))))
-    (let ((pos (pos-of-top-level-class)))
-      (when pos
-        (save-excursion
-          (goto-char pos)
-          (replace-regexp-in-string
-           "\\$$" ""
-           (plist-get (ensime-rpc-get-type-at-point) :full-name)))))))
+                     (name-of-top-level-class t)))))))))
+    (let ((name (name-of-top-level-class)))
+      (when name
+        (let ((fqdn-seq (lsp-scala-query-fully-qualified-name name)))
+          (let ((fqdn-name (car fqdn-seq)))
+            (concat (plist-get fqdn-name 'namespace) (plist-get fqdn-name 'name))))
+        ))))
 
 (defun bloop-run (mainClass)
+  "Run the fully qualified main class using bloop run."
   (let* ((root (bloop-find-root (buffer-file-name)))
          (project (bloop-current-project root))
          (project-name (car project)))
-    (bloop-exec nil root "run" "--reporter" bloop-reporter "--main " mainClass project-name)))
+    (bloop-exec nil root "run" "--reporter" bloop-reporter "--main" mainClass project-name)))
+
+(defun bloop-runMain ()
+  "Run the main class defined within the current buffer - bloop run will be used
+to perform the run action."
+  (interactive)
+  (let ((mainClass (ensime-top-level-class-closest-to-point)))
+    (when mainClass
+      (bloop-run mainClass))))
 
 (defun ensime-runMain-current-buffer ()
   (interactive)
