@@ -193,14 +193,6 @@ to perform the run action."
         (bloop-run mainClass)
       (return "Could not find top-level class"))))
 
-(defun ensime-runMain-current-buffer ()
-  (interactive)
-  (let* ((impl-class
-          (or (ensime-top-level-class-closest-to-point)
-              (return (message "Could not find top-level class"))))
-         (cleaned-class (replace-regexp-in-string "<empty>\\." "" impl-class)))
-    (bloop-run cleaned-class)))
-
 ;;
 ;; Ensime for Scala - use this or metals/lsp
 ;;
