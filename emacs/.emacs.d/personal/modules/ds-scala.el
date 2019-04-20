@@ -187,9 +187,11 @@ the point. Return nil if no class can be found."
   "Run the main class defined within the current buffer - bloop run will be used
 to perform the run action."
   (interactive)
-  (let ((mainClass (ensime-top-level-class-closest-to-point)))
-    (when mainClass
-      (bloop-run mainClass))))
+  (let ((mainClass
+         (ensime-top-level-class-closest-to-point)))
+    (if mainClass
+        (bloop-run mainClass)
+      (return "Could not find top-level class"))))
 
 (defun ensime-runMain-current-buffer ()
   (interactive)
