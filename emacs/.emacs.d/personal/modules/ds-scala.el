@@ -176,12 +176,24 @@ the point. Return nil if no class can be found."
             (concat (plist-get fqdn-name 'namespace) (plist-get fqdn-name 'name))))
         ))))
 
-(defun bloop-run (mainClass)
-  "Run the fully qualified main class using bloop run."
+(defun bloop--run-current-buffer (mainClass &optional args)
+  "Run the fully qualified main class using bloop run within the context
+of the project of the current buffer. The project root and name will
+be inferred from the file in the current buffer."
   (let* ((root (bloop-find-root (buffer-file-name)))
          (project (bloop-current-project root))
          (project-name (car project)))
-    (bloop-exec nil root "run" "--reporter" bloop-reporter "--main" mainClass project-name)))
+    (bloop-run root project-name mainClass args)))
+
+(defun bloop-run (root project-name mainClass &optional args)
+  "Run the fully qualified main class in the given project root and name
+using bloop with optional arguments. Arguments are passed as a string
+and space separated parmeters."
+  (if args
+      (bloop-exec nil root "run" "--reporter" bloop-reporter "--main"
+                  mainClass "--args" args project-name)
+    (bloop-exec nil root "run" "--reporter" bloop-reporter "--main"
+                mainClass project-name)))
 
 (defun bloop-runMain ()
   "Run the main class defined within the current buffer - bloop run will be used
@@ -190,8 +202,15 @@ to perform the run action."
   (let ((mainClass
          (ensime-top-level-class-closest-to-point)))
     (if mainClass
-        (bloop-run mainClass)
+        (bloop--run-current-buffer mainClass)
       (return "Could not find top-level class"))))
+
+;;
+;; You can explicitly run main classes in scala projects using the follow form:
+;; arguments project-root project-name fully-qualified-main-class arguments
+;;(bloop-run "~/projects/scala/language" "language-test"
+;;           "language.TestMain" "test1 test2")
+
 
 ;;
 ;; Ensime for Scala - use this or metals/lsp
@@ -236,7 +255,7 @@ to perform the run action."
 ;; using sbt runMain.
 ;;
 
-(defun ensime-sbt-runMain-current ()
+( ensime-sbt-runMain-current ()
   "Execute the sbt `runMain' command for the project and current
 object extending App within the current source test file."
   (interactive)
