@@ -136,11 +136,11 @@
 (defun bloop-show-current-project ()
   (interactive)
   (let* ((root (bloop-find-root (buffer-file-name))))
+
     (message (format "%S %S" root (bloop-current-project root)))))
 
-;;
 ;; DS - remove these key bindings as they do not work with my
 ;; prelude configuration - no prefix key.
-;;
+
 ;; (global-set-key (kbd "C-c b c") 'bloop-compile)
 ;; (global-set-key (kbd "C-c b q") 'bloop-show-current-project)
