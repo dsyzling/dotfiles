@@ -98,7 +98,9 @@
 (custom-theme-set-faces
  'twilight
  '(default ((t (:background "#141414" :foreground "#cacaca"))))
- '(font-lock-comment-face ((t (:italic t :foreground "#5F5A60")))))
+ '(font-lock-comment-face ((t (:italic t :foreground "#5F5A60"))))
+ '(font-lock-warning-face ((t (:background "#141414" :foreground "red"))))
+ )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; org-mode config
@@ -262,7 +264,9 @@
   :init (global-flycheck-mode))
 
 (use-package lsp-mode
-  :init (setq lsp-prefer-flymake nil))
+  :init (setq lsp-prefer-flymake nil)
+  :bind (:map lsp-mode-map
+              ("TAB" . company-indent-or-complete-common)))
 
 (use-package lsp-ui
   :hook (lsp-mode . lsp-ui-mode)

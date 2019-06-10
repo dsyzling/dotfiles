@@ -77,6 +77,9 @@
   :demand t
   ;; Optional - enable lsp-scala automatically in scala files
   :hook (scala-mode . lsp)
+  ;; note for bloop-cli integrtion
+  ;; :hook ((scala-mode . lsp)
+  ;;        (scala-mode . bloop-cli-init))
   :init
   ;; Bloop tries to compile the .#temp files used for interlock
   ;; so we disable interlocking - unfortunately this is global.
@@ -176,25 +179,6 @@ the point. Return nil if no class can be found."
             (concat (plist-get fqdn-name 'namespace) (plist-get fqdn-name 'name))))
         ))))
 
-(defun bloop--run-current-buffer (mainClass &optional args)
-  "Run the fully qualified main class using bloop run within the context
-of the project of the current buffer. The project root and name will
-be inferred from the file in the current buffer."
-  (let* ((root (bloop-find-root (buffer-file-name)))
-         (project (bloop-current-project root))
-         (project-name (car project)))
-    (bloop-run root project-name mainClass args)))
-
-(defun bloop-run (root project-name mainClass &optional args)
-  "Run the fully qualified main class in the given project root and name
-using bloop with optional arguments. Arguments are passed as a string
-and space separated parmeters."
-  (if args
-      (bloop-exec nil root "run" "--reporter" bloop-reporter "--main"
-                  mainClass "--args" args project-name)
-    (bloop-exec nil root "run" "--reporter" bloop-reporter "--main"
-                mainClass project-name)))
-
 (defun bloop-runMain ()
   "Run the main class defined within the current buffer - bloop run will be used
 to perform the run action."
@@ -255,16 +239,16 @@ to perform the run action."
 ;; using sbt runMain.
 ;;
 
-( ensime-sbt-runMain-current ()
-  "Execute the sbt `runMain' command for the project and current
-object extending App within the current source test file."
-  (interactive)
-  (let* ((impl-class
-          (or (ensime-top-level-class-closest-to-point)
-              (return (message "Could not find top-level class"))))
-         (cleaned-class (replace-regexp-in-string "<empty>\\." "" impl-class))
-         (command (concat "runMain" " " cleaned-class)))
-    (sbt:command command))
-  )
+;; (defun ensime-sbt-runMain-current ()
+;;   "Execute the sbt `runMain' command for the project and current
+;; object extending App within the current source test file."
+;;   (interactive)
+;;   (let* ((impl-class
+;;           (or (ensime-top-level-class-closest-to-point)
+;;               (return (message "Could not find top-level class"))))
+;;          (cleaned-class (replace-regexp-in-string "<empty>\\." "" impl-class))
+;;          (command (concat "runMain" " " cleaned-class)))
+;;     (sbt:command command))
+;;  )
 
 (provide 'ds-scala)
