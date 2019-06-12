@@ -101,6 +101,15 @@
 (load "~/.emacs.d/personal/modules/lsp-ms-python.el")
 (require 'lsp-ms-python)
 
+(defun ds-python-run-script ()
+  "Run the python script in the current buffer, output will be written to a compilation buffer."
+  (interactive)
+  (let* ((root (lsp-workspace-root))
+         (current-file (expand-file-name (buffer-file-name)))
+         (cmd (format "python -c \"import sys;import runpy;sys.path.append('%s');runpy.run_path('%s', run_name='__main__')\"" 
+                      root current-file)))
+    (compile cmd)))
+
 ;; eglot for Language server integration - alternative to lsp-mode
 ;; eglot probably functions better with the features of elpy.
 ;; (prelude-require-packages '(eglot))
