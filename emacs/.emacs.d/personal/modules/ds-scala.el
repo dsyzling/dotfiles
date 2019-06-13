@@ -24,6 +24,18 @@
 ;;;
 ;;; Code:
 (require 'seq)
+(require 'lsp-mode)
+
+;;
+;; Scala dev with Metals/lsp
+;;
+
+;;
+;; Use bloop and bloop server with metals, for now we're using a
+;; lisp package from, which we'll replace in time.
+;;   https://github.com/tues/emacs-bloop
+;;
+(load "bloop.el")
 
 ;; (use-package sbt-mode
 ;;   :pin melpa)
@@ -45,41 +57,13 @@
 ;; We may also want to consider aligning forms:
 ;; (setq scala-indent:align-forms t)
 (use-package scala-mode
-  :config
-  (setq scala-indent:align-parameters nil)
-  ;; :pin melpa
-  )
-
-;; When in comment blocks - return should automatically add an
-;; asterisk and indent.
-(defun scala-mode-newline-comments ()
-  "Custom newline appropriate for `scala-mode'."
-  ;; shouldn't this be in a post-insert hook?
-  (interactive)
-  (newline-and-indent)
-  (scala-indent:insert-asterisk-on-multiline-comment))
-
-(bind-key "RET" 'scala-mode-newline-comments scala-mode-map)
-
-;;
-;; Scala dev with Metals/lsp
-;;
-
-;;
-;; Use bloop and bloop server with metals, for now we're using a
-;; lisp package from, which we'll replace in time.
-;;   https://github.com/tues/emacs-bloop
-;;
-(load "bloop.el")
-
-(use-package lsp-scala
-  :after scala-mode
-  :demand t
-  ;; Optional - enable lsp-scala automatically in scala files
   :hook (scala-mode . lsp)
   ;; note for bloop-cli integrtion
   ;; :hook ((scala-mode . lsp)
   ;;        (scala-mode . bloop-cli-init))
+  :config
+  (setq scala-indent:align-parameters nil)
+  ;; :pin melpa
   :init
   ;; Bloop tries to compile the .#temp files used for interlock
   ;; so we disable interlocking - unfortunately this is global.
@@ -93,11 +77,81 @@
               ("C-c C-c" . bloop-compile)
               ("C-c C-z" . ensime-inf-switch)
               ("C-c C-c" . ensime-inf-eval-region)
+              ("RET"     . 'scala-mode-newline-comments)
 
               ;; find a key for this
               ;;("M-?"     . lsp-ui-peek-find-references)
               )
   )
+
+;; When in comment blocks - return should automatically add an
+;; asterisk and indent.
+(defun scala-mode-newline-comments ()
+  "Custom newline appropriate for `scala-mode'."
+  ;; shouldn't this be in a post-insert hook?
+  (interactive)
+  (newline-and-indent)
+  (scala-indent:insert-asterisk-on-multiline-comment))
+
+
+;; Temp - leaving previous config here for reference until our new
+;; lsp metals and scala config has been tested.
+
+;; (use-package lsp-mode
+;;   :demand t
+;;   ;; Optional - enable lsp-scala automatically in scala files
+;;   :hook (scala-mode . lsp)
+;;   ;; note for bloop-cli integrtion
+;;   ;; :hook ((scala-mode . lsp)
+;;   ;;        (scala-mode . bloop-cli-init))
+;;   :init
+;;   ;; Bloop tries to compile the .#temp files used for interlock
+;;   ;; so we disable interlocking - unfortunately this is global.
+;;   (setq create-lockfiles nil)
+;;   (when (eq system-type 'windows-nt)
+;;     (setq lsp-scala--server-command "metals-emacs.bat"))
+;;   :bind (:map scala-mode-map
+;;               ("C-c C-f" . helm-projectile-find-file)
+;;               ("C-c C-t" . bloop-test-only)
+;;               ("C-M-."   . helm-lsp-workspace-symbol)
+;;               ("C-c C-c" . bloop-compile)
+;;               ("C-c C-z" . ensime-inf-switch)
+;;               ("C-c C-c" . ensime-inf-eval-region)
+;;               ("RET"     . 'scala-mode-newline-comments)
+
+;;               ;; find a key for this
+;;               ;;("M-?"     . lsp-ui-peek-find-references)
+;;               )
+;;   )
+
+;;(bind-key "RET" 'scala-mode-newline-comments scala-mode-map)
+
+;; (use-package lsp-scala
+;;   :after scala-mode
+;;   :demand t
+;;   ;; Optional - enable lsp-scala automatically in scala files
+;;   :hook (scala-mode . lsp)
+;;   ;; note for bloop-cli integrtion
+;;   ;; :hook ((scala-mode . lsp)
+;;   ;;        (scala-mode . bloop-cli-init))
+;;   :init
+;;   ;; Bloop tries to compile the .#temp files used for interlock
+;;   ;; so we disable interlocking - unfortunately this is global.
+;;   (setq create-lockfiles nil)
+;;   (when (eq system-type 'windows-nt)
+;;     (setq lsp-scala--server-command "metals-emacs.bat"))
+;;   :bind (:map scala-mode-map
+;;               ("C-c C-f" . helm-projectile-find-file)
+;;               ("C-c C-t" . bloop-test-only)
+;;               ("C-M-."   . helm-lsp-workspace-symbol)
+;;               ("C-c C-c" . bloop-compile)
+;;               ("C-c C-z" . ensime-inf-switch)
+;;               ("C-c C-c" . ensime-inf-eval-region)
+
+;;               ;; find a key for this
+;;               ;;("M-?"     . lsp-ui-peek-find-references)
+;;               )
+;;   )
 
 ;;
 ;; Use ensime-inf for providing an inferior process for the Scala repl
