@@ -264,11 +264,13 @@
   :init (global-flycheck-mode))
 
 (use-package lsp-mode
+  :ensure t
   :init (setq lsp-prefer-flymake nil)
   :bind (:map lsp-mode-map
               ("TAB" . company-indent-or-complete-common)))
 
 (use-package lsp-ui
+  :ensure t
   :hook (lsp-mode . lsp-ui-mode)
   ;;:init (setq lsp-scala-server-command "~/utils/metals-emacs")
   )

@@ -57,6 +57,7 @@
 ;; We may also want to consider aligning forms:
 ;; (setq scala-indent:align-forms t)
 (use-package scala-mode
+  :ensure t
   :hook (scala-mode . lsp)
   ;; note for bloop-cli integrtion
   ;; :hook ((scala-mode . lsp)
