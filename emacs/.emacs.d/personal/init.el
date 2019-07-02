@@ -20,6 +20,17 @@
 (add-to-list 'package-archives
              '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/") t)
 
+;;
+;; Set dropbox home and orgmode-home on each platform/system.
+;;
+(setq dropbox-home
+      (pcase system-type
+        ('windows-nt "f:/Dropbox/Dropbox")
+        ('gnu/linux  "~/Dropbox")
+        ('darwin     "~/Dropbox")))
+
+(setq orgmode-home (concat dropbox-home "/home/org"))
+
 ;; disable prelude guru mode
 (setq prelude-guru nil)
 
@@ -104,10 +115,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; org-mode config
-
-(setq org-agenda-files (list "~/Dropbox/home/org/todo/todo.org"
-                             "~/Dropbox/home/org/todo/garch.org"
-                             ))
+(setq org-agenda-files (list (concat orgmode-home "/todo/todo.org")
+                             (concat orgmode-home "/todo/garch.org")))
 
 (setq org-agenda-custom-commands
       '(("p" "Projects" tags "PROJECT" nil)
@@ -132,7 +141,7 @@
 (setq org-log-done 'time)
 (custom-set-variables
  ;; hide stars and indent note items automatically
- '(org-archive-location "~/Dropbox/home/org/archive/%s_archive::")
+ '(org-archive-location (concat orgmode-home "/archive/%s_archive::"))
  '(org-startup-indented t)
  '(org-agenda-ndays 7)
  '(org-deadline-warning-days 14)
@@ -154,7 +163,7 @@
 (define-key global-map "\C-cr" 'org-remember)
 
 ;; refile targets
-(setq org-directory "~/Dropbox/home/org")
+(setq org-directory orgmode-home)
 (setq org-refile-targets (quote (("personal.org" :level . 1))))
 
 ;; mobile org
@@ -171,18 +180,18 @@
 (global-set-key (kbd "C-c j") 'org-capture)
 
 (setq org-capture-templates
-      '(
-        ("j" "Journal" entry (file+datetree
-                              "~/Dropbox/home/org/labnotebook.org")
-         "** %^{Heading}\n%?")
+      `(
+        ("j" "Journal" entry
+         (file+datetree ,(concat orgmode-home "/labnotebook.org")) "** %^{Heading}\n%?")
         
-        ("t" "ToDo" entry (file+headline "~/Dropbox/home/org/todo/inbox.org" "Inbox") "** %?\n" :prepend t)
+        ("t" "ToDo" entry
+         (file+headline ,(concat orgmode-home "/todo/inbox.org") "Inbox") "** %?\n" :prepend t)
         
-        ("l" "Link" plain (file "~/Dropbox/home/org/labnotebook.org")
-         "- %?\n %x\n")
+        ("l" "Link" plain
+         (file ,(concat orgmode-home "/labnotebook.org")) "- %?\n %x\n")
 
-        ("n" "Note-someday" entry (file+headline "~/Dropbox/home/org/labnotebook.org" "Someday")
-         "\n\n** %?\n")
+        ("n" "Note-someday" entry
+         (file+headline ,(concat orgmode-home "/labnotebook.org") "Someday") "\n\n** %?\n")
         ))
 
 ;; our org-remember templates
@@ -232,8 +241,8 @@
 
 ;; Gnus and news initialisation directory on Dropbox so we can
 ;; share amongst machines
-(setq gnus-init-file "~/Dropbox/home/gnus/.gnus.el")
-(setq gnus-startup-file "~/Dropbox/home/gnus/.newsrc")
+(setq gnus-init-file (concat dropbox-home "/home/gnus/.gnus.el"))
+(setq gnus-startup-file (concat dropbox-home "/gnus/.newsrc"))
 
 ;;
 ;; Company mode customisation
