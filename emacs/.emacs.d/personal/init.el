@@ -16,6 +16,12 @@
 (global-set-key (kbd "C-x b") 'helm-mini)
 (global-set-key (kbd "C-x C-f") 'helm-find-files)
 
+;; Helm now uses vanilla Emacs left and right to move between groups
+;; restore previous behaviour and use arrow keys
+;; https://github.com/emacs-helm/helm/wiki/FAQ#arrow-keys-behavior-have-changed
+(define-key helm-map (kbd "<left>") 'helm-previous-source)
+(define-key helm-map (kbd "<right>") 'helm-next-source)
+
 ;; add melpa stable to our package archives
 (add-to-list 'package-archives
              '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/") t)
