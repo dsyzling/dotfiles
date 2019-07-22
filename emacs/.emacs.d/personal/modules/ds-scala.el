@@ -78,6 +78,7 @@
               ("C-c C-c" . bloop-compile)
               ("C-c C-z" . ensime-inf-switch)
               ("C-c C-c" . ensime-inf-eval-region)
+              ("C-c C-d" . lsp-describe-thing-at-point)
               ("RET"     . 'scala-mode-newline-comments)
 
               ;; find a key for this
