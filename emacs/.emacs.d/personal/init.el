@@ -7,10 +7,21 @@
 
 (prelude-require-packages '(use-package))
 
+;; When saving org files a temp buffer is created with the default encoding
+;; this can cause issues under Windows and other platforms if the default
+;; buffer encoding can't deal with the characters in the document -
+;; even though the document has been specified as using utf-8 - the
+;; temp buffer will be the Emacs default (in Windows - latin1-dos)
+(set-language-environment "UTF-8")
+
 (setq ns-use-srgb-colorspace t)
 
 ;; Use helm mode everywhere
 (helm-mode 1)
+
+;; Disable undo-tree, slowing down saving large orgmode buffers and
+;; I've never really used it.
+(global-undo-tree-mode 0)
 
 ;; Use helm for buffer switching
 (global-set-key (kbd "C-x b") 'helm-mini)
@@ -37,6 +48,9 @@
 
 (setq orgmode-home (concat dropbox-home "/home/org"))
 
+;; org files will use utf-8 by default
+(modify-coding-system-alist 'file "\.org\'" 'utf-8)
+
 ;; disable prelude guru mode
 (setq prelude-guru nil)
 
@@ -59,9 +73,14 @@
 (when (eq system-type 'gnu/linux)
   (set-face-attribute 'default
                       nil
-                      :font "Inconsolata"
-                      :height 120
-                      :weight 'bold)
+                      :font "JetBrainsMono"
+                      :height 105
+                      :weight 'medium)
+  ;; (set-face-attribute 'default
+  ;;                     nil
+  ;;                     :font "Inconsolata"
+  ;;                     :height 120
+  ;;                     :weight 'bold)
   ;; Use google-chrome-stable as our default browser
   (setq browse-url-browser-function 'browse-url-generic
         browse-url-generic-program "google-chrome-stable")
@@ -272,17 +291,56 @@
    `(company-tooltip-common ((t (:inherit font-lock-constant-face))))))
 
 ;;
+;; Deft for note taking and searching
+;;
+(use-package deft
+  :ensure t
+  :commands (deft)
+  :config
+  (setq deft-directory "~/Dropbox/home/org/deft")
+  (setq deft-default-extension "org")
+  (setq deft-use-filename-as-title t)
+  (setq deft-recursive nil)
+  (setq deft-use-filter-string-for-filename t))
+
+;;
+;;org-cliplink - copy links to orgmode docs
+;; 
+(use-package org-cliplink
+  :ensure t)
+
+;;
+;; org-download - download images from web browsers and file system,
+;; drag and drop images into orgmode docs and copy files to local directory
+;; near org doc.
+;;
+(use-package org-download
+  :ensure t)
+
+;;
 ;; use lsp-mode for scala, python etc.
 ;;
 ;; Enable nice rendering of diagnostics like compile errors.
 (use-package flycheck
   :init (global-flycheck-mode))
 
+
 (use-package lsp-mode
   :ensure t
+  :load-path "~/projects/emacs/lsp-mode/"
   :init (setq lsp-prefer-flymake nil)
   :bind (:map lsp-mode-map
               ("TAB" . company-indent-or-complete-common)))
+
+(use-package lsp-treemacs
+  ;;:ensure t
+  :config
+  ;; temp for testing - normally requires autoload
+  (require 'lsp-metals-treeview)
+  (lsp-metals-treeview-enable t)
+  (setq lsp-metals-treeview-show-when-views-received t)
+  
+  :load-path "~/projects/emacs/lsp-treemacs/")
 
 (use-package lsp-ui
   :ensure t
