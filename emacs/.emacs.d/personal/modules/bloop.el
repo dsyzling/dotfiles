@@ -13,6 +13,7 @@
 ;; TODO
 
 ;;; Code:
+(require 'cl)
 
 ;;; Customization
 (defgroup bloop nil
@@ -43,8 +44,15 @@
                                              "Have you generated bloop config for this project? "
                                              "https://scalacenter.github.io/bloop/docs/installation/")))))
 
+(defun bloop--ignore-settings-file (project-files)
+  "Ignore bloop settings file and only process bloop project files."
+  (remove-if (lambda (file)
+               (string-equal "bloop.settings.json"
+                             (file-name-nondirectory file)))
+             project-files))
+
 (defun bloop-project-files (bloop-dir)
-  (directory-files bloop-dir t "\\.json$"))
+  (bloop--ignore-settings-file (directory-files bloop-dir t "\\.json$")))
 
 (defun bloop-read-project-file (project-file)
   (let* ((json-object-type 'hash-table)
