@@ -7,6 +7,9 @@
 
 (prelude-require-packages '(use-package))
 
+;; Disable prelude mode keymap, use our own keys.
+(prelude-mode -1)
+
 ;; When saving org files a temp buffer is created with the default encoding
 ;; this can cause issues under Windows and other platforms if the default
 ;; buffer encoding can't deal with the characters in the document -
@@ -58,7 +61,7 @@
 (setq prelude-whitespace nil)
 
 ;; enable desktop save mode
-;(desktop-save-mode 1)
+                                        ;(desktop-save-mode 1)
 
 (when (eq system-type 'windows-nt)
   ;;(set-face-font 'default "-outline-Consolas-bold-r-normal-normal-15-112-96-96-c-*-iso8859-1")
@@ -84,13 +87,13 @@
   ;; Use google-chrome-stable as our default browser
   (setq browse-url-browser-function 'browse-url-generic
         browse-url-generic-program "google-chrome-stable")
-  
+
   ;; (set-face-attribute 'default
   ;;                     nil
   ;;                     :font "Menlo"
   ;;                     :height 120
   ;;                     :weight 'bold)
-  
+
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -208,10 +211,10 @@
       `(
         ("j" "Journal" entry
          (file+datetree ,(concat orgmode-home "/labnotebook.org")) "** %^{Heading}\n%?")
-        
+
         ("t" "ToDo" entry
          (file+headline ,(concat orgmode-home "/todo/inbox.org") "Inbox") "** %?\n" :prepend t)
-        
+
         ("l" "Link" plain
          (file ,(concat orgmode-home "/labnotebook.org")) "- %?\n %x\n")
 
@@ -223,10 +226,10 @@
 ;; we can set our default org notes file - but we'll specify a template for todo items
 ;;(setq org-default-notes-file (concat org-directory "/notes.org"))
 (setq org-remember-templates
-      '(("Todo" ?t "* TODO %?\n  %i\n  %a" "~/Dropbox/home/org/newgtd.org" "Tasks")
-	("Articles" ?a "* %?\n  %i\n  %a" "~/Dropbox/home/org/newgtd.org" "Articles")
-        ("Journal" ?j "\n* %^{topic} %T \n%i%?\n" "~/Dropbox/home/org/journal.org")
-	("Someday" ?s "* %?\n  %i\n  %a" "~/Dropbox/home/org/newgtd.org" "Someday")))
+      '(("Todo" ?t "* TODO %?\n  %i\n  %a" (concat orgmode-home "/newgtd.org") "Tasks")
+        ("Articles" ?a "* %?\n  %i\n  %a" (concat orgmode-home "/newgtd.org") "Articles")
+        ("Journal" ?j "\n* %^{topic} %T \n%i%?\n" (concat orgmode-home "/journal.org"))
+        ("Someday" ?s "* %?\n  %i\n  %a" (concat orgmode-home "/newgtd.org") "Someday")))
 
 ;; use helm to access headlines in org file
 (add-hook 'org-mode-hook
@@ -297,15 +300,54 @@
   :ensure t
   :commands (deft)
   :config
-  (setq deft-directory "~/Dropbox/home/org/deft")
+  (setq deft-directory (concat dropbox-home "/home/org/deft"))
   (setq deft-default-extension "org")
   (setq deft-use-filename-as-title t)
   (setq deft-recursive nil)
   (setq deft-use-filter-string-for-filename t))
 
+(use-package quelpa
+  :ensure t)
+(use-package quelpa-use-package
+  :ensure t)
+
+;;
+;; org-roam
+;; Not available on (m)elpa or gnu - use quelpa to install
+;; from github.
+;;
+;;(quelpa 'org-roam :upgrade t)
+(use-package org-roam
+  :ensure t
+  :hook
+  (after-init . org-roam-mode)
+  :quelpa (org-roam :fetcher github :repo "jethrokuan/org-roam")
+  ;;:straight (:host github :repo "jethrokuan/org-roam" :branch "develop")
+  :custom
+  (org-roam-directory (concat dropbox-home "/home/org/deft"))
+  :bind (:map org-roam-mode-map
+              (("C-c n l" . org-roam)
+               ("C-c n f" . org-roam-find-file)
+               ("C-c n g" . org-roam-show-graph))
+              :map org-mode-map
+              (("C-c n i" . org-roam-insert))))
+
+;;
+;; Setup my own template so that the timestamp is not stored within the
+;; filename when creating new files.
+;;
+(defun ds/org-roam-no-timestamp-in-title (title)
+  (let ((slug (org-roam--title-to-slug title)))
+    (format "%s" slug)))
+
+(setq org-roam-templates
+      (list (list "default" (list :file #'ds/org-roam-no-timestamp-in-title
+                                  :content "#+STARTUP: showall\n#+TITLE: ${title}"))))
+
+
 ;;
 ;;org-cliplink - copy links to orgmode docs
-;; 
+;;
 (use-package org-cliplink
   :ensure t)
 
@@ -322,13 +364,18 @@
 ;;
 ;; Enable nice rendering of diagnostics like compile errors.
 (use-package flycheck
+  :ensure t
+;;  :config (setq flycheck-check-syntax-automatically nil)
   :init (global-flycheck-mode))
 
 
 (use-package lsp-mode
   :ensure t
-  :load-path "~/projects/emacs/lsp-mode/"
-  :init (setq lsp-prefer-flymake nil)
+  ;;:load-path "~/projects/emacs/lsp-mode/"
+  :init
+  :config
+  (setq lsp-prefer-capf  t
+        completion-ignore-case t)
   :bind (:map lsp-mode-map
               ("TAB" . company-indent-or-complete-common)))
 
@@ -337,19 +384,47 @@
   :config
   ;; temp for testing - normally requires autoload
   (require 'lsp-metals-treeview)
-  (lsp-metals-treeview-enable t)
+  (lsp-metals-treeview-enable nil)
   (setq lsp-metals-treeview-show-when-views-received t)
-  
-  :load-path "~/projects/emacs/lsp-treemacs/")
+
+  ;;:load-path "~/projects/emacs/lsp-treemacs/"
+  )
 
 (use-package lsp-ui
   :ensure t
+  :diminish
   :hook (lsp-mode . lsp-ui-mode)
+  :init
+  (setq lsp-ui-peek-enable t
+        lsp-ui-sideline-enable t
+        lsp-ui-imenu-enable t
+        lsp-ui-doc-enable t
+        lsp-ui-doc-position 'at-point
+        lsp-ui-doc-include-signature t)
+  :config
+  (lsp-ui-mode t)
   ;;:init (setq lsp-scala-server-command "~/utils/metals-emacs")
   )
 
 (use-package helm-lsp
   :ensure t)
+
+;; dap for debugging via lsp servers
+(use-package dap-mode
+  :ensure t
+  :defer t
+  :custom
+  (dap-mode 1)
+  (dap-ui-mode 1)
+  ;; enables mouse hover support
+  (dap-tooltip-mode 1)
+  ;; use tooltips for mouse hover
+  ;; if it is not enabled `dap-mode' will use the minibuffer.
+  (tooltip-mode 1))
+
+;; Show dap-hydra when breakpoint is hit
+(add-hook 'dap-stopped-hook
+          (lambda (arg) (call-interactively #'dap-hydra)))
 
 ;;
 ;; add our modules directory to loadpath
@@ -378,3 +453,48 @@
 ;; Render pdfs in docview at a higher resolution to improve font quality.
 ;; changing this variable may require you to call docview-clear-cache
 (setq doc-view-resolution 300)
+
+;;
+;; Experimental
+;; Configuring a different look for orgmode documents.
+;;
+
+;; (setq org-hide-emphasis-markers t)
+
+;; (font-lock-add-keywords
+;;  'org-mode
+;;  '(("^ *\\([-]\\) "
+;;     (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+
+;; (use-package org-bullets
+;;   :ensure t
+;;   :config
+;;   (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+
+;; (let* ((variable-tuple
+;;         (cond ((x-list-fonts "Source Sans Pro") '(:font "Source Sans Pro"))
+;;               ((x-list-fonts "Lucida Grande")   '(:font "Lucida Grande"))
+;;               ((x-list-fonts "Verdana")         '(:font "Verdana"))
+;;               ((x-family-fonts "Sans Serif")    '(:family "Sans Serif"))
+;;               (nil (warn "Cannot find a Sans Serif Font.  Install Source Sans Pro."))))
+;;        (base-font-color     (face-foreground 'default nil 'default))
+;;        (headline           `(:inherit default :weight bold :foreground ,base-font-color)))
+
+;;   (custom-theme-set-faces
+;;    'user
+;;    `(org-level-8 ((t (,@headline ,@variable-tuple))))
+;;    `(org-level-7 ((t (,@headline ,@variable-tuple))))
+;;    `(org-level-6 ((t (,@headline ,@variable-tuple))))
+;;    `(org-level-5 ((t (,@headline ,@variable-tuple))))
+;;    `(org-level-4 ((t (,@headline ,@variable-tuple :height 1.1))))
+;;    `(org-level-3 ((t (,@headline ,@variable-tuple :height 1.15))))
+;;    `(org-level-2 ((t (,@headline ,@variable-tuple :height 1.2))))
+;;    `(org-level-1 ((t (,@headline ,@variable-tuple :height 1.25))))
+;;    `(org-document-title ((t (,@headline ,@variable-tuple :height 1.3 :underline nil))))))
+
+;; (custom-theme-set-faces
+;;  'user
+;;  '(variable-pitch ((t (:family "Source Sans Pro" :height 180 :weight light))))
+;;  '(fixed-pitch ((t ( :family "JetBrainsMono"
+;;                              :slant normal :weight normal
+;;                              :height 1.0 :width normal)))))

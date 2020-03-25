@@ -29,6 +29,12 @@
 ;;
 ;; Scala dev with Metals/lsp
 ;;
+;; For Testing new metals versions and lsp-mode
+;; For some reason I can't override the command line options using arguments and reset
+;; So we just download a new version with the required command line options and remove
+;; metals.client=emacs.
+(setq lsp-metals-server-command "/home/dsyzling/utils/metals-emacs")
+;;(setq lsp-metals-server-args '("-Dmetals.client=vscode" "-Dmetals.execute-client-command=on"))
 
 ;;
 ;; Use bloop and bloop server with metals, for now we're using a
