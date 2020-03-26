@@ -35,6 +35,10 @@ your changes for mypy diagnostics to update correctly."
   :group 'lsp-pyls
   :package-version '(lsp-mode . "6.3"))
 
+(defcustom ds-python-use-conda t
+  "Are we using conda to manage environments?"
+  :type 'boolean)
+
 ;; For python and other languages let's remove trailing whitespace before we save.
 (defun ds/python-mode-before-save-hook ()
   (when (eq major-mode 'python-mode)
@@ -124,10 +128,6 @@ your changes for mypy diagnostics to update correctly."
         elpy-test-runner 'elpy-test-pytest-runner)
   :init
   (elpy-enable))
-
-;; lsp-mode for Language server integration.
-(prelude-require-packages '(lsp-mode company-lsp markdown-mode))
-(require 'lsp)
 
 ;; Enable pylint and flake8, disable pyflakes.
 (setq lsp-pyls-plugins-pylint-enabled t
@@ -285,6 +285,97 @@ your changes for mypy diagnostics to update correctly."
          (cmd (format "python -c \"import sys;import runpy;sys.path.append('%s');runpy.run_path('%s', run_name='__main__')\""
                       root current-file)))
     (compile cmd)))
+
+;;
+;; When using conda as an environment manager on Windows the directory
+;; paths are not adjusted correctly by pyvenv (part of elpy).
+;; Here we define the list of miniconda directories on Windows and
+;; add them to the path if we're using conda.
+;;
+(with-eval-after-load 'pyvenv
+  (when (eq system-type 'windows-nt)
+    (defun ds/miniconda--windows-directories (directory)
+      "Creates a list of miniconda directories to be added to PATH
+on Windows.  DIRECTORY is the top level miniconda environment directory."
+      (let ((miniconda-dirs '(""
+                              "Library/mingw-w64/bin"
+                              "Library/usr/bin"
+                              "Library/bin"
+                              "Scripts"
+                              "bin")))
+        (mapcar (lambda (path) (format "%s/%s" directory path))
+                miniconda-dirs)))
+
+    (defun pyvenv-activate (directory)
+      "Activate the virtual environment in DIRECTORY."
+      (interactive (list (read-directory-name "Activate venv: " nil nil nil
+                                              pyvenv-default-virtual-env-name)))
+      (setq directory (expand-file-name directory))
+      (pyvenv-deactivate)
+      (setq pyvenv-virtual-env (file-name-as-directory directory)
+            pyvenv-virtual-env-name (file-name-nondirectory
+                                     (directory-file-name directory))
+            python-shell-virtualenv-path directory
+            python-shell-virtualenv-root directory)
+      ;; Set venv name as parent directory for generic directories or for
+      ;; the user's default venv name
+      (when (or (member pyvenv-virtual-env-name '("venv" ".venv" "env" ".env"))
+                (and pyvenv-default-virtual-env-name
+                     (string= pyvenv-default-virtual-env-name
+                              pyvenv-virtual-env-name)))
+        (setq pyvenv-virtual-env-name
+              (file-name-nondirectory
+               (directory-file-name
+                (file-name-directory
+                 (directory-file-name directory))))))
+      ;; Preserve variables from being overwritten.
+      (let ((old-exec-path exec-path)
+            (old-eshell-path eshell-path-env)
+            (old-process-environment process-environment))
+        (unwind-protect
+            (pyvenv-run-virtualenvwrapper-hook "pre_activate" pyvenv-virtual-env)
+          (setq exec-path old-exec-path
+                eshell-path-env old-eshell-path
+                process-environment old-process-environment)))
+      (run-hooks 'pyvenv-pre-activate-hooks)
+      (let ((new-directories (append
+                              ;; Unix
+                              (when (file-exists-p (format "%s/bin" directory))
+                                (list (format "%s/bin" directory)))
+                              ;; Windows
+                              (when (file-exists-p (format "%s/Scripts" directory))
+                                ;; For miniconda/anaconda add all required directories.
+                                (if ds-python-use-conda
+                                    (ds/miniconda--windows-directories directory)
+                                  (list (format "%s/Scripts" directory)
+                                        ;; Apparently, some virtualenv
+                                        ;; versions on windows put the
+                                        ;; python.exe in the virtualenv root
+                                        ;; for some reason?
+                                        directory))))))
+        (setq pyvenv-old-exec-path exec-path
+              pyvenv-old-eshell-path eshell-path-env
+              pyvenv-old-process-environment process-environment
+              ;; For some reason, Emacs adds some directories to `exec-path'
+              ;; but not to `process-environment'?
+              exec-path (append new-directories exec-path)
+              ;; set eshell path to same as exec-path
+              eshell-path-env (mapconcat 'identity exec-path ":")
+              process-environment (append
+                                   (list
+                                    (format "VIRTUAL_ENV=%s" directory)
+                                    (format "PATH=%s"
+                                            (mapconcat 'identity
+                                                       (append new-directories
+                                                               (split-string (getenv "PATH")
+                                                                             path-separator))
+                                                       path-separator))
+                                    ;; No "=" means to unset
+                                    "PYTHONHOME")
+                                   process-environment)
+              ))
+      (pyvenv-run-virtualenvwrapper-hook "post_activate")
+      (run-hooks 'pyvenv-post-activate-hooks))))
 
 ;; eglot for Language server integration - alternative to lsp-mode
 ;; eglot probably functions better with the features of elpy.

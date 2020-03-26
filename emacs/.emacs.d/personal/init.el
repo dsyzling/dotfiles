@@ -406,6 +406,9 @@
   ;;:init (setq lsp-scala-server-command "~/utils/metals-emacs")
   )
 
+(use-package markdown-mode
+  :ensure t)
+
 (use-package helm-lsp
   :ensure t)
 
