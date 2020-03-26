@@ -298,12 +298,12 @@ your changes for mypy diagnostics to update correctly."
       "Creates a list of miniconda directories to be added to PATH
 on Windows.  DIRECTORY is the top level miniconda environment directory."
       (let ((miniconda-dirs '(""
-                              "Library/mingw-w64/bin"
-                              "Library/usr/bin"
-                              "Library/bin"
+                              "Library\\mingw-w64\\bin"
+                              "Library\\usr\\bin"
+                              "Library\\bin"
                               "Scripts"
                               "bin")))
-        (mapcar (lambda (path) (format "%s/%s" directory path))
+        (mapcar (lambda (path) (format "%s\\%s" directory path))
                 miniconda-dirs)))
 
     (defun pyvenv-activate (directory)
