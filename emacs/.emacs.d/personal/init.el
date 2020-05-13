@@ -321,29 +321,40 @@
   :ensure t
   :hook
   (after-init . org-roam-mode)
-  :quelpa (org-roam :fetcher github :repo "jethrokuan/org-roam")
+  ;;:quelpa (org-roam :fetcher github :repo "jethrokuan/org-roam")
   ;;:straight (:host github :repo "jethrokuan/org-roam" :branch "develop")
+  :config
   :custom
   (org-roam-directory (concat dropbox-home "/home/org/deft"))
   :bind (:map org-roam-mode-map
               (("C-c n l" . org-roam)
                ("C-c n f" . org-roam-find-file)
-               ("C-c n g" . org-roam-show-graph))
+               ("C-c n g" . org-roam-graph-show))
               :map org-mode-map
               (("C-c n i" . org-roam-insert))))
 
-;;
-;; Setup my own template so that the timestamp is not stored within the
-;; filename when creating new files.
-;;
-(defun ds/org-roam-no-timestamp-in-title (title)
-  (let ((slug (org-roam--title-to-slug title)))
-    (format "%s" slug)))
+(use-package company-org-roam
+  :ensure t
+  :config
+  (push 'company-org-roam company-backends))
 
-(setq org-roam-templates
-      (list (list "default" (list :file #'ds/org-roam-no-timestamp-in-title
-                                  :content "#+STARTUP: showall\n#+TITLE: ${title}"))))
-
+;;
+;; org-roam capture templates, specify default and by own custom one
+;; which doesn't include the timestamp in the filename and uses showall
+;; to expand all headings and sections in the doc by default.
+;;
+(setq org-roam-capture-templates
+      '(("d" "default" plain (function org-roam--capture-get-point)
+         "%?"
+         :file-name "%<%Y%m%d%H%M%S>-${slug}"
+         :head "#+TITLE: ${title}\n"
+         :unnarrowed t)
+        ;; My own custom template no date in file and add show all by default
+        ("n" "DS Custom" plain (function org-roam--capture-get-point)
+         "%?"
+         :file-name "${slug}"
+         :head "#+STARTUP: showall\n#+TITLE: ${title}\n\n"
+         :unnarrowed t)))
 
 ;;
 ;;org-cliplink - copy links to orgmode docs
@@ -425,9 +436,21 @@
   ;; if it is not enabled `dap-mode' will use the minibuffer.
   (tooltip-mode 1))
 
+;; TODO - temporarily removed dap-hydra - finding it difficult to
+;; use this in conjunction with the dap-ui-repl - seems to want
+;; to capture all key presses. For now we're defining a few common
+;; debugging keys.
 ;; Show dap-hydra when breakpoint is hit
-(add-hook 'dap-stopped-hook
-          (lambda (arg) (call-interactively #'dap-hydra)))
+;; (add-hook 'dap-stopped-hook
+;;           (lambda (arg) (call-interactively #'dap-hydra)))
+
+;; define a set of basic keys to allow us simple debug navigation.
+(define-key dap-mode-map (kbd "<f8>") 'dap-next)
+(define-key dap-mode-map (kbd "<f7>") 'dap-step-in)
+(define-key dap-mode-map (kbd "<f5>") 'dap-continue)
+(define-key dap-mode-map (kbd "<f9>") 'dap-toggle-breakpoint)
+(define-key dap-mode-map (kbd "<f6>") 'dap-disconnect)
+
 
 ;;
 ;; add our modules directory to loadpath
