@@ -130,7 +130,7 @@ your changes for mypy diagnostics to update correctly."
   (elpy-enable))
 
 ;; Enable pylint and flake8, disable pyflakes.
-(setq lsp-pyls-plugins-pylint-enabled t
+(setq lsp-pyls-plugins-pylint-enabled nil
       lsp-pyls-plugins-flake8-enabled t
       lsp-pyls-plugins-pyflakes-enabled nil)
 
@@ -162,6 +162,20 @@ your changes for mypy diagnostics to update correctly."
 ;; use dap for debugging - this will make sure the dap run configurations
 ;; are available for python - pytest and main. 
 (require 'dap-python)
+
+;;
+;; An example debug template showing how to invoke a script and pass arguments.
+;;
+;; (dap-register-debug-template
+;;  "Python :: mypy"
+;;  (list :type "python"
+;;        :args "/home/dsyzling/projects/python/pandastest/tests/test_mypy.py"
+;;        :cwd nil
+;;        :program nil
+;;        ;; :module "pytest"
+;;        :target-module "/home/dsyzling/projects/python/mypy/mypy/__main__.py"
+;;        :request "launch"
+;;        :name "Python :: Run Configuration"))
 
 ;; Importmagic for automatic imports
 (use-package importmagic
@@ -200,6 +214,14 @@ your changes for mypy diagnostics to update correctly."
                          (require 'lsp-python-ms)
                          (lsp))))  ; or lsp-deferred
 
+(defun ds-python-elpy-shell-send-region-or-buffer-and-step (&optional arg)
+  "Send selected region or buffer to python interpreter and then remove/
+deactive current selection. This is a wrapper around the function -
+elpy-shell-send-region-or-buffer-and-step."
+  (interactive "P")
+  (elpy-shell-send-region-or-buffer-and-step arg)
+  (deactivate-mark))
+
 ;;
 ;; Define key map for python mode with lsp
 ;;
@@ -210,6 +232,9 @@ your changes for mypy diagnostics to update correctly."
 ;; Apply code action - useful for automatic imports in mspyls
 ;; also see - lsp-ui-sideline-apply-code-actions
 (define-key elpy-mode-map (kbd "M-RET")   'lsp-execute-code-action)
+;; Override default elpy key binding to send selection or buffer to python interpreter.
+;; I want to remove the selection after executing.
+(define-key elpy-mode-map (kbd "C-c C-c") 'ds-python-elpy-shell-send-region-or-buffer-and-step)
 
 ;;
 ;; switch servers to use either Palentir (pyls) or the Microsoft Python
@@ -277,14 +302,49 @@ your changes for mypy diagnostics to update correctly."
     (add-to-list 'flycheck-checkers 'lsp)
     (add-hook 'lsp-after-diagnostics-hook #'lsp--flycheck-report nil t)))
 
-(defun ds-python-run-script ()
-  "Run the python script in the current buffer, output will be written to a compilation buffer."
+;; TODO Testing a new version, we can remove this version when I know this works
+;; reliably.
+;;
+;; (defun ds-python-run-script ()
+;;   "Run the python script in the current buffer, output will be written to a compilation buffer."
+;;   (interactive)
+;;   (let* ((root (lsp-workspace-root))
+;;          (current-file (expand-file-name (buffer-file-name)))
+;;          (cmd (format "python -c \"import sys;import runpy;sys.path.append('%s');runpy.run_path('%s', run_name='__main__')\""
+;;                       root current-file)))
+;;     (compile cmd)))
+
+(defun ds/quoteStr (v)
+  (format "'%s'" v))
+
+(defun ds/python-list (args)
+  (mapconcat 'ds/quoteStr args ","))
+
+(defun ds-python-run-script (script-file &rest args)
+  "Run the given python script, output will be written to a compilation  
+buffer. SCRIPT-FILE contains the python file name and optional ARGS which
+will be passed on the command line."
+  (let* ((root (lsp-workspace-root))
+         (sysv-args (if args
+                        (format ";sys.argv=[sys.argv[0], %s];" (ds/python-list args))
+                      ";"))
+         (cmd (format "python -c \"import sys;import runpy;sys.path.append('%s') %s runpy.run_path('%s', run_name='__main__')\""
+                      root sysv-args script-file)))
+    (compile cmd)))
+
+(defun ds-python-run-current-buffer ()
+  "Run the python script in the current buffer, output will be written to
+a compilation buffer. The python script is executed with the fully qualified
+path and the current directory is set to the workspace root directory and
+restored after.  have encountered issues where the current directory
+can contain modules with the same name as site-packages (mypy/types)."
   (interactive)
   (let* ((root (lsp-workspace-root))
          (current-file (expand-file-name (buffer-file-name)))
-         (cmd (format "python -c \"import sys;import runpy;sys.path.append('%s');runpy.run_path('%s', run_name='__main__')\""
-                      root current-file)))
-    (compile cmd)))
+         (saved-dir default-directory))
+    (cd root)
+    (ds-python-run-script current-file)
+    (cd saved-dir)))
 
 ;;
 ;; When using conda as an environment manager on Windows the directory
