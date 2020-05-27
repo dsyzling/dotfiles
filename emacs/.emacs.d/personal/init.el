@@ -356,6 +356,12 @@
          :head "#+STARTUP: showall\n#+TITLE: ${title}\n\n"
          :unnarrowed t)))
 
+;; Mood-lone mode - sort out by mode line
+(use-package mood-line
+  :ensure t
+  :init
+  (mood-line-mode))
+
 ;;
 ;;org-cliplink - copy links to orgmode docs
 ;;
@@ -382,7 +388,7 @@
 
 (use-package lsp-mode
   :ensure t
-  ;;:load-path "~/projects/emacs/lsp-mode/"
+  ;; :load-path "~/projects/emacs/lsp-mode/"
   :init
   :config
   (setq lsp-prefer-capf  t
@@ -475,6 +481,13 @@
 ;;  (prelude-require-packages '(elpy company-jedi))
 ;;
 (require 'ds-python)
+
+;; pyls appears to have some terrible performance problems and issues
+;; - goto definition not working reliably, so for now use the Microsoft
+;; server by default.
+(with-eval-after-load 'lsp-pyls
+  (ds-python-use-mspyls))
+
 
 ;; Render pdfs in docview at a higher resolution to improve font quality.
 ;; changing this variable may require you to call docview-clear-cache

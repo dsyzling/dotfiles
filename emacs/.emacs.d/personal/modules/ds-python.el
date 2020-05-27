@@ -204,6 +204,10 @@ your changes for mypy diagnostics to update correctly."
 ;;
 ;; lsp-python-ms - implementation currently linked from the main lsp-mode project.
 ;;
+;; Compiling the Microsoft Python language Server
+;;  cd python-language-server/src/LanguageServer/Impl
+;;  dotnet build -c Release
+;;
 (when (eq system-type 'gnu/linux)
   (setq lsp-python-ms-executable
         (expand-file-name "~/projects/python/python-language-server/output/bin/Release/Microsoft.Python.LanguageServer")))
@@ -240,32 +244,38 @@ elpy-shell-send-region-or-buffer-and-step."
 ;; switch servers to use either Palentir (pyls) or the Microsoft Python
 ;; language server mspyls by updating the registered client priority.
 ;;
+
+(defvar ds/lsp-flycheck-checkers (ht))
+
 (defun ds-python-use-pyls ()
   "Override priority of registered python servers and use Palentir pyls by default."
   (interactive)
   (setf (lsp--client-priority (ht-get lsp-clients 'pyls)) 0)
-  (setf (lsp--client-priority (ht-get lsp-clients 'mspyls)) -2))
+  (setf (lsp--client-priority (ht-get lsp-clients 'mspyls)) -2)
+  
+  (ht-remove ds/lsp-flycheck-checkers 'python-mode))
+
 
 (defun ds-python-use-mspyls ()
   "Override priority of registered python servers and use MS pyls by default."
   (interactive)
   (setf (lsp--client-priority (ht-get lsp-clients 'pyls)) -1)
   (setf (lsp--client-priority (ht-get lsp-clients 'mspyls)) 0)
+
+  (ht-set ds/lsp-flycheck-checkers 'python-mode 'python-flake8)
   
-  ;; Setup flycheck checkers for mypy and flake8 since the Microsoft
-  ;; server doesn't have plugins for these and generate diagnostic messages.
-  ;; First clear down next checkers for mypy otherwise we'll continue add
-  ;; checkers.
-  (setf (flycheck-checker-get 'python-mypy 'next-checkers) nil)
-  ;; lsp will be end of the flycheck chain since its next-checker is nil.
-  (flycheck-add-next-checker 'python-mypy 'lsp)
-  (flycheck-add-next-checker 'python-mypy 'python-flake8))
+  ;; setup chain of checkers - flake8 -> mypy -> lsp
+  (setf (flycheck-checker-get 'python-flake8 'next-checkers) nil)
+  (setf (flycheck-checker-get 'lsp 'next-checkers) nil)
+  (flycheck-add-next-checker 'python-flake8 'lsp)
+  (flycheck-add-next-checker 'python-flake8 'python-mypy)
+  )
 
 ;;
 ;; Provide our own lsp-flycheck-enable function which allows us to
 ;; support the MS Python Language Server along with flake8 and mypy
 ;; running controlled by flycheck.
-;; Lsp assumes that the language server provides all linting and syntax
+;; Lsp curretly assumes that the language server provides all linting and syntax
 ;; diagnostics. Pyls does this by adding/enabling plugins for flake8, pylint
 ;; etc. and then generating errors/warnings through lsp diagnostic messages.
 ;; mspyls doesn't do this expecting the client to add further linting.
@@ -274,32 +284,15 @@ elpy-shell-send-region-or-buffer-and-step."
 ;;
 ;; Switch to use mspyls with M-x ds-python-use-mspyls.
 ;; This will setup a flycheck chain:
-;;  python-mypy -> python-flake8 -> lsp
-;;
-;; We then set flycheck-check-syntax-automatically to perform linting/errors
-;; on save. and set the initial checker to be python-mypy.
-;; 
+;;  python-flake8 -> lsp -> python-mypy
 ;;
 (with-eval-after-load 'lsp-mode
   (defun lsp-flycheck-enable (&rest _)
     "Enable flycheck integration for the current buffer."
     (flycheck-mode 1)
-    ;; Apply our behaviour to python mode only when we're using
-    ;; the ms python server.
-    (if (and (eq major-mode 'python-mode)
-             (eq 'mspyls (lsp--client-server-id (car (lsp--find-clients)))))
-        (progn
-          (when lsp-flycheck-live-reporting
-            (setq-local flycheck-check-syntax-automatically
-                        '(save idle-change new-line mode-enabled)))
-          (setq-local flycheck-checker 'python-mypy))
-      (progn
-        (when lsp-flycheck-live-reporting
-          (setq-local flycheck-check-syntax-automatically nil))
-        (setq-local flycheck-checker 'lsp) ))
-    
     (lsp-flycheck-add-mode major-mode)
     (add-to-list 'flycheck-checkers 'lsp)
+    (setq-local flycheck-checker (ht-get ds/lsp-flycheck-checkers major-mode 'lsp))
     (add-hook 'lsp-after-diagnostics-hook #'lsp--flycheck-report nil t)))
 
 ;; TODO Testing a new version, we can remove this version when I know this works
