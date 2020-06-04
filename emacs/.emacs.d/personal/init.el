@@ -362,6 +362,9 @@
   :init
   (mood-line-mode))
 
+(set-face-background 'mode-line "#000000")
+(set-face-foreground 'mode-line "#FEFEFE")
+
 ;;
 ;;org-cliplink - copy links to orgmode docs
 ;;
