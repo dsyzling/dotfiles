@@ -142,13 +142,6 @@ your changes for mypy diagnostics to update correctly."
    '(("pyls.plugins.pyls_mypy.enabled" lsp-pyls-plugins-mypy-enabled t)
      ("pyls.plugins.pyls_mypy.live_mode" lsp-pyls-plugins-mypy-live-mode-enabled nil))))
 
-;; For python add flake8 as the next checker after lsp
-;;(setq lsp-flycheck-live-reporting t)
-;;(flycheck-add-next-checker 'lsp 'python-flake8)
-;;(flycheck-add-next-checker 'python-flake8 'lsp)
-;;(flycheck-select-checker 'python-flake8)
-;;(setq flycheck-check-syntax-automatically '(save idle-change new-line mode-enabled))
-
 ;;
 ;; When using Conda we'll update our environment variable so that pyvenv used by elpy
 ;; can find our virtual environments.
@@ -239,6 +232,13 @@ elpy-shell-send-region-or-buffer-and-step."
 ;; Override default elpy key binding to send selection or buffer to python interpreter.
 ;; I want to remove the selection after executing.
 (define-key elpy-mode-map (kbd "C-c C-c") 'ds-python-elpy-shell-send-region-or-buffer-and-step)
+
+;; Customise flycheck.
+;; Conda on Windows has already moved to using python rather than python3
+;; within environments, flycheck defaults to using python3 so we need to
+;; customise linters.
+(setq-default flycheck-python-flake8-executable "python")
+(setq-default flycheck-python-pylint-executable "python")
 
 ;;
 ;; switch servers to use either Palentir (pyls) or the Microsoft Python
@@ -344,18 +344,19 @@ can contain modules with the same name as site-packages (mypy/types)."
 ;; paths are not adjusted correctly by pyvenv (part of elpy).
 ;; Here we define the list of miniconda directories on Windows and
 ;; add them to the path if we're using conda.
+;; Note: not sure if we need the following directories on Windows
+;; in the path:
+;;  Library/bin
+;;  Library/mingw-w64
 ;;
 (with-eval-after-load 'pyvenv
   (when (eq system-type 'windows-nt)
     (defun ds/miniconda--windows-directories (directory)
       "Creates a list of miniconda directories to be added to PATH
 on Windows.  DIRECTORY is the top level miniconda environment directory."
-      (let ((miniconda-dirs '(""
-                              "Library\\mingw-w64\\bin"
-                              "Library\\usr\\bin"
+      (let ((miniconda-dirs '("./"
                               "Library\\bin"
-                              "Scripts"
-                              "bin")))
+                              "Scripts")))
         (mapcar (lambda (path) (format "%s\\%s" directory path))
                 miniconda-dirs)))
 
