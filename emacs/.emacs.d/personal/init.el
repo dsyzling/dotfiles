@@ -37,8 +37,7 @@
 (define-key helm-map (kbd "<right>") 'helm-next-source)
 
 ;; add melpa stable to our package archives
-(add-to-list 'package-archives
-             '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/") t)
+;; (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 
 ;;
 ;; Set dropbox home and orgmode-home on each platform/system.
@@ -388,7 +387,6 @@
 ;;  :config (setq flycheck-check-syntax-automatically nil)
   :init (global-flycheck-mode))
 
-
 (use-package lsp-mode
   :ensure t
   ;; :load-path "~/projects/emacs/lsp-mode/"
@@ -400,12 +398,12 @@
               ("TAB" . company-indent-or-complete-common)))
 
 (use-package lsp-treemacs
-  ;;:ensure t
+  :ensure t
   :config
   ;; temp for testing - normally requires autoload
-  (require 'lsp-metals-treeview)
-  (lsp-metals-treeview-enable nil)
-  (setq lsp-metals-treeview-show-when-views-received t)
+  ;; (require 'lsp-metals-treeview)
+  ;; (lsp-metals-treeview-enable nil)
+  ;; (setq lsp-metals-treeview-show-when-views-received t)
 
   ;;:load-path "~/projects/emacs/lsp-treemacs/"
   )
@@ -426,11 +424,13 @@
   ;;:init (setq lsp-scala-server-command "~/utils/metals-emacs")
   )
 
+(use-package helm-lsp
+  :ensure t)
+
+
 (use-package markdown-mode
   :ensure t)
 
-(use-package helm-lsp
-  :ensure t)
 
 ;; dap for debugging via lsp servers
 (use-package dap-mode
@@ -454,11 +454,12 @@
 ;;           (lambda (arg) (call-interactively #'dap-hydra)))
 
 ;; define a set of basic keys to allow us simple debug navigation.
-(define-key dap-mode-map (kbd "<f8>") 'dap-next)
-(define-key dap-mode-map (kbd "<f7>") 'dap-step-in)
-(define-key dap-mode-map (kbd "<f5>") 'dap-continue)
-(define-key dap-mode-map (kbd "<f9>") 'dap-toggle-breakpoint)
-(define-key dap-mode-map (kbd "<f6>") 'dap-disconnect)
+(with-eval-after-load 'dap-mode
+  (define-key dap-mode-map (kbd "<f8>") 'dap-next)
+  (define-key dap-mode-map (kbd "<f7>") 'dap-step-in)
+  (define-key dap-mode-map (kbd "<f5>") 'dap-continue)
+  (define-key dap-mode-map (kbd "<f9>") 'dap-toggle-breakpoint)
+  (define-key dap-mode-map (kbd "<f6>") 'dap-disconnect))
 
 
 ;;
