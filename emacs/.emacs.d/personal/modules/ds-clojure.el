@@ -10,7 +10,8 @@
 ;;
 ;; Cider/Clojure/Clojurescript customisation
 ;;
-(require 'cider)
+(use-package cider
+  :ensure t)
 
 (prelude-require-packages '(paredit))
 
