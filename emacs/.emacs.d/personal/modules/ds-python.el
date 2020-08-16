@@ -260,19 +260,10 @@ elpy-shell-send-region-or-buffer-and-step."
   "Override priority of registered python servers and use MS pyls by default."
   (interactive)
   (setf (lsp--client-priority (ht-get lsp-clients 'pyls)) -1)
-  (setf (lsp--client-priority (ht-get lsp-clients 'mspyls)) 0)
-
-  (ht-set ds/lsp-flycheck-checkers 'python-mode 'python-flake8)
-  
-  ;; setup chain of checkers - flake8 -> mypy -> lsp
-  (setf (flycheck-checker-get 'python-flake8 'next-checkers) nil)
-  (setf (flycheck-checker-get 'lsp 'next-checkers) nil)
-  (flycheck-add-next-checker 'python-flake8 'lsp)
-  (flycheck-add-next-checker 'python-flake8 'python-mypy)
-  )
+  (setf (lsp--client-priority (ht-get lsp-clients 'mspyls)) 0))
 
 ;;
-;; Provide our own lsp-flycheck-enable function which allows us to
+;; Provide our own lsp-flycheck-add-mode function which allows us to
 ;; support the MS Python Language Server along with flake8 and mypy
 ;; running controlled by flycheck.
 ;; Lsp curretly assumes that the language server provides all linting and syntax
@@ -287,13 +278,18 @@ elpy-shell-send-region-or-buffer-and-step."
 ;;  python-flake8 -> lsp -> python-mypy
 ;;
 (with-eval-after-load 'lsp-mode
-  (defun lsp-flycheck-enable (&rest _)
-    "Enable flycheck integration for the current buffer."
-    (flycheck-mode 1)
-    (lsp-flycheck-add-mode major-mode)
-    (add-to-list 'flycheck-checkers 'lsp)
-    (setq-local flycheck-checker (ht-get ds/lsp-flycheck-checkers major-mode 'lsp))
-    (add-hook 'lsp-after-diagnostics-hook #'lsp--flycheck-report nil t)))
+  (defun lsp-flycheck-add-mode (mode)
+    "Register flycheck support for MODE."
+    (unless (flycheck-checker-supports-major-mode-p 'lsp mode)
+      (flycheck-add-mode 'lsp mode))
+    (when (eq mode 'python-mode)
+      ;; setup chain of checkers - flake8 -> mypy -> lsp
+      (setf (flycheck-checker-get 'python-flake8 'next-checkers) nil)
+      (setf (flycheck-checker-get 'lsp 'next-checkers) nil)
+      (flycheck-add-next-checker 'python-flake8 'lsp)
+      (flycheck-add-next-checker 'python-flake8 'python-mypy)
+      (setq-local flycheck-checker 'python-flake8))))
+
 
 ;; TODO Testing a new version, we can remove this version when I know this works
 ;; reliably.
