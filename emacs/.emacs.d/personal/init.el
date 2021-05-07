@@ -486,6 +486,11 @@
 ;;
 (require 'ds-python)
 
+;;
+;; Customisation for an R environment.
+;;
+(require 'ds-R)
+
 ;; pyls appears to have some terrible performance problems and issues
 ;; - goto definition not working reliably, so for now use the Microsoft
 ;; server by default.
