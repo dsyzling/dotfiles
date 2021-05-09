@@ -25,7 +25,6 @@
      (ess-R-fl-keyword:F&T . t)
      (ess-eval-visibly 'nowait)
      (ess-use-company 'script-only)))
-  
   :init
   (require 'ess-site))
 
@@ -35,6 +34,7 @@
 ;; Override keys to match our lsp-mode keys for other languages
 ;;
 (define-key ess-mode-map (kbd "C-c C-d") 'ess-display-help-on-object)
+
 ;;
 ;; This temporarily skirts around an issue which is prompting for a working
 ;; but can't display a buffer prompt with helm active.
