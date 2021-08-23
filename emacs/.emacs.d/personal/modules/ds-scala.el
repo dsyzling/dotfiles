@@ -1,40 +1,17 @@
 ;;; ds-scala.el --- Personal Scala Configuration for Emacs
-;;
-;; Author: Darren Syzling <dsyzling@gmail.com>
-;; Keywords: scala, ensime
 
-;;; Commentary:
-;;; Open a scala file within a project and execute
-;;;  M-x ensime
-;;;
-;;; In order for auto compile on save to work run
-;;;  M-x ensime-sbt
-;;;
-;;; To configure the files displayed with helm-projectile-find-file
-;;; use the .gitignore file - so add the following to your .gitignore
-;;;   .ensime
-;;;   .ensime_cache
-;;;   target
-;;;   .idea
-;;;
-;;; Then initialise a git repository with git init.
 ;;
-;;; The fix ds/ensime-sbt-ansi-color-workaround may be removed in future
-;;; it was added to avoid ansi codes being displayed inside sbt mode.
+;;
+;; Scala dev with Metals/lsp
+;;
+
+;; Author: Darren Syzling <dsyzling@gmail.com>
+;; Keywords: scala, lsp, metals
+
 ;;;
 ;;; Code:
 (require 'seq)
 (require 'lsp-mode)
-
-;;
-;; Scala dev with Metals/lsp
-;;
-;; For Testing new metals versions and lsp-mode
-;; For some reason I can't override the command line options using arguments and reset
-;; So we just download a new version with the required command line options and remove
-;; metals.client=emacs.
-(setq lsp-metals-server-command "/home/dsyzling/utils/metals-emacs")
-;;(setq lsp-metals-server-args '("-Dmetals.client=vscode" "-Dmetals.execute-client-command=on"))
 
 ;;
 ;; Use bloop and bloop server with metals, for now we're using a
@@ -42,9 +19,6 @@
 ;;   https://github.com/tues/emacs-bloop
 ;;
 (load "bloop.el")
-
-;; (use-package sbt-mode
-;;   :pin melpa)
 
 (use-package sbt-mode
   :commands sbt-start sbt-command
@@ -54,7 +28,9 @@
   (substitute-key-definition
    'minibuffer-complete-word
    'self-insert-command
-   minibuffer-local-completion-map))
+   minibuffer-local-completion-map)
+  ;; sbt-supershell kills sbt-mode:  https://github.com/hvesalai/emacs-sbt-mode/issues/152
+  (setq sbt:program-options '("-Dsbt.supershell=false")))
 
 ;; Override default indenting rules allow parameters to indented/aligned
 ;; See the following for further options:
@@ -70,7 +46,6 @@
   ;;        (scala-mode . bloop-cli-init))
   :config
   (setq scala-indent:align-parameters nil)
-  ;; :pin melpa
   :init
   ;; Bloop tries to compile the .#temp files used for interlock
   ;; so we disable interlocking - unfortunately this is global.
@@ -78,19 +53,30 @@
   (when (eq system-type 'windows-nt)
     (setq lsp-scala--server-command "metals-emacs.bat"))
   :bind (:map scala-mode-map
-              ("C-c C-f" . helm-projectile-find-file)
+              ;;("C-c C-f" . helm-projectile-find-file)
+              ("C-c C-f" . counsel-projectile-find-file)
               ("C-c C-t" . bloop-test-only)
-              ("C-M-."   . helm-lsp-workspace-symbol)
+              ;;("C-M-."   . helm-lsp-workspace-symbol)
+              ("C-M-."   . lsp-ivy-workspace-symbol)
               ("C-c C-c" . bloop-compile)
               ("C-c C-z" . ensime-inf-switch)
               ("C-c C-c" . ensime-inf-eval-region)
               ("C-c C-d" . lsp-describe-thing-at-point)
               ("RET"     . 'scala-mode-newline-comments)
+              ("M-RET"   . 'helm-lsp-code-actions)
+              ("C-c-C-r" . lsp-ui-peek-find-references)
+              ))
 
-              ;; find a key for this
-              ;;("M-?"     . lsp-ui-peek-find-references)
-              )
-  )
+;; Add metals backend for lsp-mode
+(use-package lsp-metals
+  :ensure t)
+
+;; For Testing new metals versions and lsp-mode
+;; For some reason I can't override the command line options using arguments and reset
+;; So we just download a new version with the required command line options and remove
+;; metals.client=emacs.
+;;(setq lsp-metals-server-command "/home/dsyzling/utils/metals-emacs")
+;;(setq lsp-metals-server-args '("-Dmetals.client=vscode" "-Dmetals.execute-client-command=on"))
 
 ;; When in comment blocks - return should automatically add an
 ;; asterisk and indent.
@@ -257,60 +243,5 @@ to perform the run action."
 ;;(bloop-run "~/projects/scala/language" "language-test"
 ;;           "language.TestMain" "test1 test2")
 
-
-;;
-;; Ensime for Scala - use this or metals/lsp
-;;
-
-;; Scala/ensime
-;; http://ensime.github.io/editors/emacs/install/
-;; setup our own keys for common operations to match python.
-;; (use-package ensime
-;;   :ensure t
-;;   :config
-;;   ;;(setq ensime-sbt-perform-on-save "test:compile")
-;;   :bind (:map ensime-mode-map
-;;               ("C-c C-t" . ensime-sbt-do-test-only-dwim)
-;;               ("C-c C-d" . ensime-show-doc-for-symbol-at-point)
-;;               ("C-c C-f" . helm-projectile-find-file)
-;;               ("C-c C-z" . ensime-inf-switch)
-;;               ("C-c C-c" . ensime-inf-eval-region)
-;;               ("C-u C-c C-c" . ensime-sbt-do-run)
-;;               )
-;;   :pin melpa)
-
-;; (require 'ensime-sbt)
-
-;;
-;; When activating an ensime project for the first time -
-;; run M-x ensime-sbt. This will activate sbt and setup
-;; the auto save hooks. If we run a unit test (which starts sbt)
-;; the auto save hooks do not seem to be setup properly.
-;;
-
-;; (defun ds/ensime-sbt-ansi-color-workaround (&rest args)
-;;   "https://github.com/ensime/emacs-sbt-mode/issues/150"
-;;   (with-current-buffer (sbt:buffer-name)
-;;     (remove-hook 'comint-output-filter-functions 'ensime-inf-postoutput-filter)
-;;     (add-hook 'comint-output-filter-functions 'ensime-inf-postoutput-filter t)))
-
-;; (advice-add 'ensime-sbt :after #'ds/ensime-sbt-ansi-color-workaround)
-
-;;
-;; Run the command App extended class within the current buffer
-;; using sbt runMain.
-;;
-
-;; (defun ensime-sbt-runMain-current ()
-;;   "Execute the sbt `runMain' command for the project and current
-;; object extending App within the current source test file."
-;;   (interactive)
-;;   (let* ((impl-class
-;;           (or (ensime-top-level-class-closest-to-point)
-;;               (return (message "Could not find top-level class"))))
-;;          (cleaned-class (replace-regexp-in-string "<empty>\\." "" impl-class))
-;;          (command (concat "runMain" " " cleaned-class)))
-;;     (sbt:command command))
-;;  )
 
 (provide 'ds-scala)

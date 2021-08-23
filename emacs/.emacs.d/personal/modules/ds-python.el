@@ -12,9 +12,6 @@
 
 ;;; Code:
 
-(require 'electric)
-(require 'prelude-programming)
-
 ;;
 ;; Eventually pyls (Palentir) will have its own mypy plugin internally.
 ;; In the meantime we use the pyls-mypy third party plugin (pip install pyls-mypy)
@@ -46,68 +43,68 @@ your changes for mypy diagnostics to update correctly."
 
 (add-hook 'before-save-hook #'ds/python-mode-before-save-hook)
 
-;; Copy pasted from ruby-mode.el
-(defun prelude-python--encoding-comment-required-p ()
-  (re-search-forward "[^\0-\177]" nil t))
+;; ;; Copy pasted from ruby-mode.el
+;; (defun prelude-python--encoding-comment-required-p ()
+;;   (re-search-forward "[^\0-\177]" nil t))
 
-(defun prelude-python--detect-encoding ()
-  (let ((coding-system
-         (or save-buffer-coding-system
-             buffer-file-coding-system)))
-    (if coding-system
-        (symbol-name
-         (or (coding-system-get coding-system 'mime-charset)
-             (coding-system-change-eol-conversion coding-system nil)))
-      "ascii-8bit")))
+;; (defun prelude-python--detect-encoding ()
+;;   (let ((coding-system
+;;          (or save-buffer-coding-system
+;;              buffer-file-coding-system)))
+;;     (if coding-system
+;;         (symbol-name
+;;          (or (coding-system-get coding-system 'mime-charset)
+;;              (coding-system-change-eol-conversion coding-system nil)))
+;;       "ascii-8bit")))
 
-(defun prelude-python--insert-coding-comment (encoding)
-  (let ((newlines (if (looking-at "^\\s *$") "\n" "\n\n")))
-    (insert (format "# coding: %s" encoding) newlines)))
+;; (defun prelude-python--insert-coding-comment (encoding)
+;;   (let ((newlines (if (looking-at "^\\s *$") "\n" "\n\n")))
+;;     (insert (format "# coding: %s" encoding) newlines)))
 
-(defun prelude-python-mode-set-encoding ()
-  "Insert a magic comment header with the proper encoding if necessary."
-  (save-excursion
-    (widen)
-    (goto-char (point-min))
-    (when (prelude-python--encoding-comment-required-p)
-      (goto-char (point-min))
-      (let ((coding-system (prelude-python--detect-encoding)))
-        (when coding-system
-          (if (looking-at "^#!") (beginning-of-line 2))
-          (cond ((looking-at "\\s *#\\s *.*\\(en\\)?coding\\s *:\\s *\\([-a-z0-9_]*\\)")
-                 ;; update existing encoding comment if necessary
-                 (unless (string= (match-string 2) coding-system)
-                   (goto-char (match-beginning 2))
-                   (delete-region (point) (match-end 2))
-                   (insert coding-system)))
-                ((looking-at "\\s *#.*coding\\s *[:=]"))
-                (t (prelude-python--insert-coding-comment coding-system)))
-          (when (buffer-modified-p)
-            (basic-save-buffer-1)))))))
+;; (defun prelude-python-mode-set-encoding ()
+;;   "Insert a magic comment header with the proper encoding if necessary."
+;;   (save-excursion
+;;     (widen)
+;;     (goto-char (point-min))
+;;     (when (prelude-python--encoding-comment-required-p)
+;;       (goto-char (point-min))
+;;       (let ((coding-system (prelude-python--detect-encoding)))
+;;         (when coding-system
+;;           (if (looking-at "^#!") (beginning-of-line 2))
+;;           (cond ((looking-at "\\s *#\\s *.*\\(en\\)?coding\\s *:\\s *\\([-a-z0-9_]*\\)")
+;;                  ;; update existing encoding comment if necessary
+;;                  (unless (string= (match-string 2) coding-system)
+;;                    (goto-char (match-beginning 2))
+;;                    (delete-region (point) (match-end 2))
+;;                    (insert coding-system)))
+;;                 ((looking-at "\\s *#.*coding\\s *[:=]"))
+;;                 (t (prelude-python--insert-coding-comment coding-system)))
+;;           (when (buffer-modified-p)
+;;             (basic-save-buffer-1)))))))
 
-(when (fboundp 'exec-path-from-shell-copy-env)
-  (exec-path-from-shell-copy-env "PYTHONPATH"))
+;; (when (fboundp 'exec-path-from-shell-copy-env)
+;;   (exec-path-from-shell-copy-env "PYTHONPATH"))
 
-(defun ds-python-mode-defaults ()
-  "Defaults for Python programming."
-  (subword-mode +1)
-  ;; (eldoc-mode 1)
-  (setq-local electric-layout-rules
-              '((?: . (lambda ()
-                        (and (zerop (first (syntax-ppss)))
-                             (python-info-statement-starts-block-p)
-                             'after)))))
-  (when (fboundp #'python-imenu-create-flat-index)
-    (setq-local imenu-create-index-function
-                #'python-imenu-create-flat-index))
-  (add-hook 'post-self-insert-hook
-            #'electric-layout-post-self-insert-function nil 'local)
-  (add-hook 'after-save-hook 'prelude-python-mode-set-encoding nil 'local))
+;; (defun ds-python-mode-defaults ()
+;;   "Defaults for Python programming."
+;;   (subword-mode +1)
+;;   ;; (eldoc-mode 1)
+;;   (setq-local electric-layout-rules
+;;               '((?: . (lambda ()
+;;                         (and (zerop (first (syntax-ppss)))
+;;                              (python-info-statement-starts-block-p)
+;;                              'after)))))
+;;   (when (fboundp #'python-imenu-create-flat-index)
+;;     (setq-local imenu-create-index-function
+;;                 #'python-imenu-create-flat-index))
+;;   (add-hook 'post-self-insert-hook
+;;             #'electric-layout-post-self-insert-function nil 'local)
+;;   (add-hook 'after-save-hook 'prelude-python-mode-set-encoding nil 'local))
 
-(setq ds-python-mode-hook 'ds-python-mode-defaults)
+;; (setq ds-python-mode-hook 'ds-python-mode-defaults)
 
-(add-hook 'python-mode-hook (lambda ()
-                              (run-hooks 'ds-python-mode-hook)))
+;; (add-hook 'python-mode-hook (lambda ()
+;;                               (run-hooks 'ds-python-mode-hook)))
 
 ;; Using elpy with lsp-mode for our python
 (use-package elpy
@@ -119,7 +116,7 @@ your changes for mypy diagnostics to update correctly."
                        ;;elpy-module-company
                        ;;elpy-module-eldoc
                        ;;elpy-module-flymake
-                       elpy-module-highlight-indentation
+                       ;; elpy-module-highlight-indentation
                        elpy-module-pyvenv
                        ;;elpy-module-yasnippet
                        ;;elpy-module-django
@@ -137,6 +134,7 @@ your changes for mypy diagnostics to update correctly."
 ;;
 ;; Register our third party mypy plugin for pyls.
 ;;
+
 (with-eval-after-load 'lsp-mode
   (lsp-register-custom-settings
    '(("pyls.plugins.pyls_mypy.enabled" lsp-pyls-plugins-mypy-enabled t)
@@ -157,6 +155,46 @@ your changes for mypy diagnostics to update correctly."
 (require 'dap-python)
 
 ;;
+;; Register our own debug provider and template to automatically add
+;; workspace root to pythonpath before invoking the debugger.
+;;
+(defun dap-python-run-buffer-with-pythonpath (conf)
+  "Define PYTHONPATH to use workspace root so package imports work
+when debugging. Setup CONF to use standard python debugging and
+override environment variables with our new PYTHONPATH."
+  (dap-python--populate-start-file-args conf)
+  (plist-put conf :environment-variables `(("PYTHONPATH" . ,(lsp-workspace-root))))
+  conf)
+
+(dap-register-debug-provider "python-run-with-python-path" 'dap-python-run-buffer-with-pythonpath)
+(dap-register-debug-template "DS Python :: Run file (buffer)"
+                             (list :type "python-run-with-python-path"
+                                   :args ""
+                                   :cwd nil
+                                   :module nil
+                                   :program nil
+                                   :request "launch"
+                                   :name "DS Python :: Run file (buffer)"))
+
+;; Temporary fix to align output buffer for our debug template above.
+;; Position the output window at the bottom of our screen.
+(add-to-list 'display-buffer-alist
+             `("DS Python"
+               (display-buffer-reuse-window display-buffer-at-bottom)
+               (window-width . 0.5)
+               (window-height . 0.25)
+               (reusable-frames)))
+
+;; (with-eval-after-load 'lsp-mode
+;;   (setq display-buffer-alist 
+;;         (append display-buffer-alist 
+;;                 `(("*DS Python*"
+;;                    (display-buffer-reuse-window display-buffer-at-bottom)
+;;                    (window-width . 0.5)
+;;                    (window-height . 0.25)
+;;                    (reusable-frames))))))
+
+;;
 ;; An example debug template showing how to invoke a script and pass arguments.
 ;;
 ;; (dap-register-debug-template
@@ -171,13 +209,13 @@ your changes for mypy diagnostics to update correctly."
 ;;        :name "Python :: Run Configuration"))
 
 ;; Importmagic for automatic imports
-(use-package importmagic
-  :ensure t
-  :config
-  ;; Originally C-c C-l was mapped to importmagic-fix-imports, however this doesn't
-  ;; support type hints very well. So for now use fix-symbol-at-point.
-  (define-key importmagic-mode-map (kbd "C-c C-l") 'importmagic-fix-symbol-at-point)
-  (add-hook 'python-mode-hook 'importmagic-mode))
+;; (use-package importmagic
+;;   :ensure t
+;;   :config
+;;   ;; Originally C-c C-l was mapped to importmagic-fix-imports, however this doesn't
+;;   ;; support type hints very well. So for now use fix-symbol-at-point.
+;;   (define-key importmagic-mode-map (kbd "C-c C-l") 'importmagic-fix-symbol-at-point)
+;;   (add-hook 'python-mode-hook 'importmagic-mode))
 
 ;;
 ;; This is my older implementation of using the MS Python Server.
@@ -201,15 +239,39 @@ your changes for mypy diagnostics to update correctly."
 ;;  cd python-language-server/src/LanguageServer/Impl
 ;;  dotnet build -c Release
 ;;
-(when (eq system-type 'gnu/linux)
-  (setq lsp-python-ms-executable
-        (expand-file-name "~/projects/python/python-language-server/output/bin/Release/Microsoft.Python.LanguageServer")))
+;; (when (eq system-type 'gnu/linux)
+;;   (setq lsp-python-ms-executable
+;;         (expand-file-name "~/projects/python/python-language-server/output/bin/Release/Microsoft.Python.LanguageServer")))
 
-(use-package lsp-python-ms
+;; (use-package lsp-python-ms
+;;   :ensure t
+;;   :hook (python-mode . (lambda ()
+;;                          (require 'lsp-python-ms)
+;;                          (lsp))))  ; or lsp-deferred
+
+;;
+;; Use pyright - replacement for Microsoft Python Language Server.
+;;
+(use-package lsp-pyright
   :ensure t
+  :config
+  (setq lsp-clients-python-library-directories '("/usr/" "~/miniconda3/pkgs"))
+  (setq lsp-pyright-disable-language-service nil
+        lsp-pyright-disable-organize-imports nil
+        lsp-pyright-auto-import-completions t
+        lsp-pyright-use-library-code-for-types nil
+        lsp-pyright-multi-root nil
+        ;; off basic or strict - basic is the default.
+        ;; lsp-pyright-typechecking-mode "strict"
+        lsp-pyright-venv-path "/home/dsyzling/miniconda3/envs"
+        ;; Debugger can be debugpy or ptvsd
+        dap-python-debugger 'ptvsd)
+  ;; Ensure if we're running mypy that generated files do not cause change
+  ;; notifications otherwise this leads to recurring diagnostic checks.
+  (push "[/\\\\]\\.mypy_cache\\'" lsp-file-watch-ignored-directories)
   :hook (python-mode . (lambda ()
-                         (require 'lsp-python-ms)
-                         (lsp))))  ; or lsp-deferred
+                         (require 'lsp-pyright)
+                         (lsp-deferred))))
 
 (defun ds-python-elpy-shell-send-region-or-buffer-and-step (&optional arg)
   "Send selected region or buffer to python interpreter and then remove/
@@ -222,8 +284,10 @@ elpy-shell-send-region-or-buffer-and-step."
 ;;
 ;; Define key map for python mode with lsp
 ;;
-(define-key elpy-mode-map (kbd "C-c C-f") 'helm-projectile-find-file)
+;;(define-key elpy-mode-map (kbd "C-c C-f") 'helm-projectile-find-file)
+(define-key elpy-mode-map (kbd "C-c C-f") 'counsel-projectile-find-file)
 (define-key elpy-mode-map (kbd "C-M-.")   'helm-lsp-workspace-symbol)
+;;(define-key elpy-mode-map (kbd "C-M-.")   'lsp-ivy-workspace-symbol)
 (define-key elpy-mode-map (kbd "C-c C-d") 'lsp-describe-thing-at-point)
 (define-key elpy-mode-map (kbd "M-.")     'lsp-find-definition)
 ;; Apply code action - useful for automatic imports in mspyls
@@ -232,6 +296,8 @@ elpy-shell-send-region-or-buffer-and-step."
 ;; Override default elpy key binding to send selection or buffer to python interpreter.
 ;; I want to remove the selection after executing.
 (define-key elpy-mode-map (kbd "C-c C-c") 'ds-python-elpy-shell-send-region-or-buffer-and-step)
+(define-key elpy-mode-map (kbd "M-RET") 'helm-lsp-code-actions)
+(define-key elpy-mode-map (kbd "C-c C-r") 'lsp-ui-peek-find-references)
 
 ;; Customise flycheck.
 ;; Conda on Windows has already moved to using python rather than python3
@@ -239,6 +305,31 @@ elpy-shell-send-region-or-buffer-and-step."
 ;; customise linters.
 (setq-default flycheck-python-flake8-executable "python")
 (setq-default flycheck-python-pylint-executable "python")
+
+;; Customise flycheck checkers used within specific language modes.
+;; For python when using pyright we'll chain flake8 and mypy.
+;;TODO - move flycheck-local-cache and functions to a common area so
+;; we can use this approach in multiple language modes.
+;; from https://github.com/flycheck/flycheck/issues/1762
+(defvar-local my/flycheck-local-cache nil)
+
+(defun my/flycheck-checker-get (fn checker property)
+  (or (alist-get property (alist-get checker my/flycheck-local-cache))
+      (funcall fn checker property))) 
+
+(advice-add 'flycheck-checker-get :around 'my/flycheck-checker-get)
+
+(add-hook 'lsp-managed-mode-hook
+          (lambda ()
+            (when (derived-mode-p 'python-mode)
+              ;; Disable flycheck checkers we're not using
+              (add-to-list 'flycheck-disabled-checkers 'python-pylint)
+              (add-to-list 'flycheck-disabled-checkers 'python-pycompile)
+              ;; disable mypy and use pyright type checking - can't seem
+              ;; to exclude mypy cache from pyright file system watch.
+              ;;(add-to-list 'flycheck-disabled-checkers 'python-mypy)
+              (setq my/flycheck-local-cache
+                    '((lsp . ((next-checkers . (python-flake8 python-mypy)))))))))
 
 ;;
 ;; switch servers to use either Palentir (pyls) or the Microsoft Python
@@ -277,19 +368,19 @@ elpy-shell-send-region-or-buffer-and-step."
 ;; This will setup a flycheck chain:
 ;;  python-flake8 -> lsp -> python-mypy
 ;;
-(with-eval-after-load 'lsp-mode
-  (defun lsp-flycheck-add-mode (mode)
-    "Register flycheck support for MODE."
-    (unless (flycheck-checker-supports-major-mode-p 'lsp mode)
-      (flycheck-add-mode 'lsp mode))
-    (when (eq mode 'python-mode)
-      ;; setup chain of checkers - flake8 -> mypy -> lsp
-      (setf (flycheck-checker-get 'python-flake8 'next-checkers) nil)
-      (setf (flycheck-checker-get 'lsp 'next-checkers) nil)
-      (flycheck-add-next-checker 'python-flake8 'lsp)
-      (flycheck-add-next-checker 'python-flake8 'python-mypy)
-      (setq-local flycheck-checker 'python-flake8))))
-
+;; (with-eval-after-load 'lsp-mode
+;;   (defun lsp-flycheck-add-mode (mode)
+;;     "Register flycheck support for MODE."
+;;     (unless (flycheck-checker-supports-major-mode-p 'lsp mode)
+;;       (flycheck-add-mode 'lsp mode))
+;;     (when (eq mode 'python-mode)
+;;       ;; setup chain of checkers - flake8 -> mypy -> lsp
+;;       (setf (flycheck-checker-get 'python-flake8 'next-checkers) nil)
+;;       (setf (flycheck-checker-get 'lsp 'next-checkers) nil)
+;;       (flycheck-add-next-checker 'python-flake8 'lsp)
+;;       (flycheck-add-next-checker 'python-flake8 'python-mypy)
+;;       (setq-local flycheck-checker 'python-flake8))
+;; ))
 
 ;; TODO Testing a new version, we can remove this version when I know this works
 ;; reliably.
@@ -334,6 +425,29 @@ can contain modules with the same name as site-packages (mypy/types)."
     (cd root)
     (ds-python-run-script current-file)
     (cd saved-dir)))
+
+
+(defun ds-python-run-command (cmd working-dir new-buffer-name)
+  "Run the command CMD in the given WORKING-DIR relative to the top level
+workspace directory. This function ensures PYTHONPATH is updated with
+the top level project directory so modules can be imported. Rename the
+buffer to NEW_BUFFER-NAME after the process has started"
+  (interactive)
+  (let* ((root (lsp-workspace-root))
+         (saved-dir default-directory)
+         (run-dir (concat (file-name-as-directory root) working-dir))
+         (run-cmd (format "export PYTHONPATH=$PYTHONPATH:%s; %s" root cmd)))
+    (cd run-dir)
+    (compile run-cmd)
+    (with-current-buffer "*compilation*"
+      (rename-buffer new-buffer-name))
+    (cd saved-dir)))
+
+(defun pytrader-stats ()
+  "Launch Pytrader Bokeh stats server for experiments."
+  (interactive)
+  (ds-python-run-command
+   "python -m bokeh serve experiments stats markets" "pytrader/plot" "*pytrader-stats*"))
 
 ;;
 ;; When using conda as an environment manager on Windows the directory
@@ -427,15 +541,6 @@ on Windows.  DIRECTORY is the top level miniconda environment directory."
       (pyvenv-run-virtualenvwrapper-hook "post_activate")
       (run-hooks 'pyvenv-post-activate-hooks))))
 
-;; eglot for Language server integration - alternative to lsp-mode
-;; eglot probably functions better with the features of elpy.
-;; (prelude-require-packages '(eglot))
-;; (add-hook 'python-mode-hook 'eglot-ensure)
-;; (eval-after-load 'eglot
-;;   '(define-key eglot-mode-map (kbd "C-c C-d") 'eglot-help-at-point))
-
-;; (add-hook 'lsp-mode-hook 'lsp-ui-mode)
-;; (add-hook 'python-mode-hook 'flycheck-mode)
 
 (provide 'ds-python)
 

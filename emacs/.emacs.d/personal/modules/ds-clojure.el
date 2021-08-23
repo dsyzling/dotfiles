@@ -13,7 +13,8 @@
 (use-package cider
   :ensure t)
 
-(prelude-require-packages '(paredit))
+(use-package paredit
+  :ensure t)
 
 (add-hook 'cider-repl-mode-hook 'paredit-mode)
 (add-hook 'cider-mode-hook 'paredit-mode)
