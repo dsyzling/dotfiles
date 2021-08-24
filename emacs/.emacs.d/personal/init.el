@@ -423,6 +423,7 @@
 ;; Font size
 (global-set-key (kbd "C-+") 'text-scale-increase)
 (global-set-key (kbd "C--") 'text-scale-decrease)
+(global-set-key (kbd "C-x j") 'avy-goto-char)
 
 ;; define a set of basic keys to allow us simple debug navigation.
 (with-eval-after-load 'dap-mode
