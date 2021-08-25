@@ -338,8 +338,17 @@
   :defer t
   :config
   ;; Don't show breakpoints on initial display for debugger.
-  (setq dap-auto-configure-features '(sessions locals expressions controls tooltip))
-  (dap-auto-configure-mode))
+  (setq dap-auto-configure-features '(sessions locals expressions controls tooltip repl))
+  (dap-auto-configure-mode)
+   ;; Position dap-ui-repl at the bottom of the screen. These are defaults from dap-ui.
+  (setq dap-ui-buffer-configurations
+        `((,dap-ui--locals-buffer . ((side . right) (slot . 1) (window-width . 0.20)))
+          (,dap-ui--expressions-buffer . ((side . right) (slot . 2) (window-width . 0.20)))
+          (,dap-ui--sessions-buffer . ((side . right) (slot . 3) (window-width . 0.20)))
+          (,dap-ui--breakpoints-buffer . ((side . left) (slot . 2) (window-width . ,treemacs-width)))
+          (,dap-ui--debug-window-buffer . ((side . bottom) (slot . 3) (window-width . 0.20)))
+          (,dap-ui--repl-buffer . ((side . bottom) (slot . 1) (window-height . 0.20))))))
+
 
 ;; TODO - temporarily removed dap-hydra - finding it difficult to
 ;; use this in conjunction with the dap-ui-repl - seems to want
