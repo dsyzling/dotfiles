@@ -449,6 +449,17 @@ buffer to NEW_BUFFER-NAME after the process has started"
   (ds-python-run-command
    "python -m bokeh serve experiments stats markets" "pytrader/plot" "*pytrader-stats*"))
 
+;;Debug and attach to pytrader stats.
+(defun debug-pytrader-stats ()
+  "Launch Pytrader Bokeh stats server for experiments."
+  (interactive)
+  (ds-python-run-command
+   "python -m debugpy --listen localhost:5678 --wait-for-client -m bokeh serve experiments stats markets" "pytrader/plot" "*pytrader-stats*")
+  (dap-debug (list :name "Python Attach"
+                   :type "python"
+                   :request "attach"
+                   :port 5678
+                   :host "localhost")))
 ;;
 ;; When using conda as an environment manager on Windows the directory
 ;; paths are not adjusted correctly by pyvenv (part of elpy).
