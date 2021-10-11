@@ -26,6 +26,14 @@
 ;; org files will use utf-8 by default
 (modify-coding-system-alist 'file "\.org\'" 'utf-8)
 
+;; configure org-babel to allow execution for certain languages
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '(
+   (emacs-lisp . t)
+   (python . t)
+   ))
+
 ;;
 ;; org-super-agenda
 ;;

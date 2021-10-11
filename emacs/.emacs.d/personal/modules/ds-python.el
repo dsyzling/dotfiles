@@ -255,11 +255,12 @@ override environment variables with our new PYTHONPATH."
 (use-package lsp-pyright
   :ensure t
   :config
-  (setq lsp-clients-python-library-directories '("/usr/" "~/miniconda3/pkgs"))
-  (setq lsp-pyright-disable-language-service nil
+  ;; (setq lsp-clients-python-library-directories '("/usr/" "/home/dsyzling/miniconda3/pkgs"))
+  (setq lsp-pyright-disable-language-services nil
         lsp-pyright-disable-organize-imports nil
         lsp-pyright-auto-import-completions t
-        lsp-pyright-use-library-code-for-types nil
+        ;; This is required to get completion/docs in libraries 
+        lsp-pyright-use-library-code-for-types t
         lsp-pyright-multi-root nil
         ;; off basic or strict - basic is the default.
         ;; lsp-pyright-typechecking-mode "strict"
@@ -328,8 +329,9 @@ elpy-shell-send-region-or-buffer-and-step."
               ;; disable mypy and use pyright type checking - can't seem
               ;; to exclude mypy cache from pyright file system watch.
               ;;(add-to-list 'flycheck-disabled-checkers 'python-mypy)
+              (setf (flycheck-checker-get 'python-flake8 'next-checkers) '(python-mypy))
               (setq my/flycheck-local-cache
-                    '((lsp . ((next-checkers . (python-flake8 python-mypy)))))))))
+                    '((lsp . ((next-checkers . (python-flake8)))))))))
 
 ;;
 ;; switch servers to use either Palentir (pyls) or the Microsoft Python
@@ -412,6 +414,7 @@ will be passed on the command line."
                       root sysv-args script-file)))
     (compile cmd)))
 
+
 (defun ds-python-run-current-buffer ()
   "Run the python script in the current buffer, output will be written to
 a compilation buffer. The python script is executed with the fully qualified
@@ -426,7 +429,6 @@ can contain modules with the same name as site-packages (mypy/types)."
     (ds-python-run-script current-file)
     (cd saved-dir)))
 
-
 (defun ds-python-run-command (cmd working-dir new-buffer-name)
   "Run the command CMD in the given WORKING-DIR relative to the top level
 workspace directory. This function ensures PYTHONPATH is updated with
@@ -438,10 +440,13 @@ buffer to NEW_BUFFER-NAME after the process has started"
          (run-dir (concat (file-name-as-directory root) working-dir))
          (run-cmd (format "export PYTHONPATH=$PYTHONPATH:%s; %s" root cmd)))
     (cd run-dir)
+    (when (get-buffer new-buffer-name)
+      (kill-buffer new-buffer-name))
     (compile run-cmd)
     (with-current-buffer "*compilation*"
       (rename-buffer new-buffer-name))
     (cd saved-dir)))
+
 
 (defun pytrader-stats ()
   "Launch Pytrader Bokeh stats server for experiments."
@@ -449,17 +454,81 @@ buffer to NEW_BUFFER-NAME after the process has started"
   (ds-python-run-command
    "python -m bokeh serve experiments stats markets" "pytrader/plot" "*pytrader-stats*"))
 
-;;Debug and attach to pytrader stats.
 (defun debug-pytrader-stats ()
   "Launch Pytrader Bokeh stats server for experiments."
   (interactive)
   (ds-python-run-command
-   "python -m debugpy --listen localhost:5678 --wait-for-client -m bokeh serve experiments stats markets" "pytrader/plot" "*pytrader-stats*")
+   "python -m debugpy --listen localhost:5678 --wait-for-client -m bokeh serve experiments stats markets" "pytrader/plot" "*debug-pytrader-stats*")
   (dap-debug (list :name "Python Attach"
                    :type "python"
                    :request "attach"
                    :port 5678
                    :host "localhost")))
+
+(defun ds-python-package-root ()
+  "Return the top level package root directory of the current file buffer.
+Uses the workspace root to identify the top level directory and then parses
+the file buffer's path to obtain the first directory after the workspace root.
+Crude replacement of paths for this to work with Windows."
+  (let* ((buffer-fullpath (file-truename (file-name-directory buffer-file-name)))
+         (root (lsp-workspace-root))
+         (package-string
+          (s-replace "\\" "/" (substring buffer-fullpath (length root)))))
+    (car (split-string package-string "/" t))))
+
+;; TODO - add this to my config.
+;; we can use ./ in place of pytrader and combine with
+;; flycheck mypy config file - i.e. pyproject.toml
+;; (setq-local flycheck-python-mypy-config "pyproject.toml")
+(defun ds-mypy-project ()
+  "Run mypy type checker over project."
+  (interactive)
+  (let* ((package-root (ds-python-package-root))
+         (cmd (concat "mypy --config-file pyproject.toml " package-root)))
+   (ds-python-run-command cmd "./" "*mypy*")))
+
+(defun ds-pylint-project ()
+  "Run pylint over project. Runs from the top level package of the
+current buffer's root package. This may be the library/app's top level
+package or 'test'."
+  (interactive)
+  (let* ((package-root (ds-python-package-root))
+         (cmd (concat "pylint --rcfile=pyproject.toml " package-root)))
+   (ds-python-run-command cmd "./" "*pylint*")))
+
+;;
+;; ipython support for interactive python, data analysis and notebooks.
+;;
+(use-package ipython-shell-send
+  :ensure t)
+
+(defun ds-ipython-shell-send-region (start end &optional send-main msg)
+  "Send selected region or buffer to ipython interpreter and then remove/
+deactive current selection. This is a wrapper around the function -
+ipython-shell-send-region"
+  (interactive
+   (list (region-beginning) (region-end) current-prefix-arg t))
+  (ipython-shell-send-region start end send-main msg)
+  (deactivate-mark))
+
+(defun ds-switch-to-ipython ()
+  "Switch interpreter to ipython."
+  (interactive)
+  (setq python-shell-interpreter "ipython"
+        python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True")
+  (define-key elpy-mode-map
+    (kbd "C-c C-c")
+    'ds-ipython-shell-send-region))
+
+(defun ds-switch-to-python ()
+  "switch interpreter to standard python."
+  (interactive)
+  (setq python-shell-interpreter "python"
+        python-shell-interpreter-args "-i")
+  (define-key elpy-mode-map
+    (kbd "C-c C-c")
+    'ds-python-elpy-shell-send-region-or-buffer-and-step))
+
 ;;
 ;; When using conda as an environment manager on Windows the directory
 ;; paths are not adjusted correctly by pyvenv (part of elpy).
@@ -551,6 +620,9 @@ on Windows.  DIRECTORY is the top level miniconda environment directory."
               ))
       (pyvenv-run-virtualenvwrapper-hook "post_activate")
       (run-hooks 'pyvenv-post-activate-hooks))))
+
+;; By default use IPython
+(ds-switch-to-ipython)
 
 
 (provide 'ds-python)

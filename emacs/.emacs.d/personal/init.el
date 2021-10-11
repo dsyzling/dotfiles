@@ -65,6 +65,7 @@
   :bind
   (:map ivy-mode-map
         ("C-'" . ivy-avy)
+        ("C-J" . ivy-im)
         )
   :config
   (ivy-mode 1)
@@ -215,8 +216,10 @@
   :ensure t
   :config
   ;; Reduce company idle delay for completion
-  (setq company-idle-delay 0.3
+  (setq company-idle-delay 0.1
+        company-minimum-prefix-length 2
         company-tooltip-align-annotations t
+        company-tooltip-minimum-width 50
         company-icon-size 20)
   :init
   (global-company-mode 1)
@@ -233,7 +236,7 @@
    `(company-tooltip ((t (:inherit default :background ,(color-lighten-name bg 2)))))
    `(company-scrollbar-bg ((t (:background ,(color-lighten-name bg 10)))))
    `(company-scrollbar-fg ((t (:background ,(color-lighten-name bg 5)))))
-   `(company-tooltip-selection ((t (:inherit font-lock-function-name-face))))
+   `(company-tooltip-selection ((t (:background ,(color-lighten-name bg 10)))))
    `(company-tooltip-common ((t (:inherit font-lock-constant-face))))))
 
 ;; Mood-lone mode - sort out by mode line
@@ -251,8 +254,27 @@
 ;; Enable nice rendering of diagnostics like compile errors.
 (use-package flycheck
   :ensure t
-;;  :config (setq flycheck-check-syntax-automatically nil)
+  :config
+  ;; (setq flycheck-check-syntax-automatically nil)
+  ;; Override default column width for filename 6 -> 12
+  (setq flycheck-error-list-format
+      `[("File" 12)
+        ("Line" 5 flycheck-error-list-entry-< :right-align t)
+        ("Col" 3 nil :right-align t)
+        ("Level" 8 flycheck-error-list-entry-level-<)
+        ("ID" 35 flycheck-error-list-entry-level-<)
+        (,(flycheck-error-list-make-last-column "Message" 'Checker) 0 t)])
+
   :init (global-flycheck-mode))
+
+;; position flycheck messages buffer
+(setq display-buffer-alist
+      (append display-buffer-alist
+              '(("*Flycheck errors*"
+        (display-buffer-reuse-window display-buffer-at-bottom)
+        (window-width . 1.0)
+        (window-height . 0.25)
+        (reusable-frames . nil)))))
 
 (use-package lsp-mode
   :ensure t
