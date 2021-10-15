@@ -420,13 +420,20 @@ will be passed on the command line."
 a compilation buffer. The python script is executed with the fully qualified
 path and the current directory is set to the workspace root directory and
 restored after.  have encountered issues where the current directory
-can contain modules with the same name as site-packages (mypy/types)."
+can contain modules with the same name as site-packages (mypy/types).
+Name the buffer based on the file name of the script being run."
   (interactive)
   (let* ((root (lsp-workspace-root))
-         (current-file (expand-file-name (buffer-file-name)))
+         (current-path (expand-file-name (buffer-file-name)))
+         (current-file (file-name-nondirectory current-path))
+         (new-buffer-name (format "*%s*" current-file))
          (saved-dir default-directory))
     (cd root)
-    (ds-python-run-script current-file)
+    (when (get-buffer new-buffer-name)
+      (kill-buffer new-buffer-name))
+    (ds-python-run-script current-path)
+    (with-current-buffer "*compilation*"
+      (rename-buffer new-buffer-name))
     (cd saved-dir)))
 
 (defun ds-python-run-command (cmd working-dir new-buffer-name)
@@ -449,14 +456,22 @@ buffer to NEW_BUFFER-NAME after the process has started"
 
 
 (defun pytrader-stats ()
-  "Launch Pytrader Bokeh stats server for experiments."
+  "Launch Pytrader Bokeh stats server for experiments.
+If pytrader-stats is running close the buffer/process and restart."
   (interactive)
+  (when (get-buffer "*pytrader-stats*")
+    (let ((kill-buffer-query-functions nil))
+    (kill-buffer "*pytrader-stats*")))
   (ds-python-run-command
    "python -m bokeh serve experiments stats markets" "pytrader/plot" "*pytrader-stats*"))
 
 (defun debug-pytrader-stats ()
-  "Launch Pytrader Bokeh stats server for experiments."
+  "Debug launch Pytrader Bokeh stats server for experiments.
+if pytrader-stats is running close the buffer/process and restart"
   (interactive)
+  (when (get-buffer "*pytrader-stats*")
+    (let ((kill-buffer-query-functions nil))
+    (kill-buffer "*pytrader-stats*")))
   (ds-python-run-command
    "python -m debugpy --listen localhost:5678 --wait-for-client -m bokeh serve experiments stats markets" "pytrader/plot" "*debug-pytrader-stats*")
   (dap-debug (list :name "Python Attach"
