@@ -216,7 +216,7 @@
   :ensure t
   :config
   ;; Reduce company idle delay for completion
-  (setq company-idle-delay 0.1
+  (setq company-idle-delay 0.2
         company-minimum-prefix-length 2
         company-tooltip-align-annotations t
         company-tooltip-minimum-width 50
