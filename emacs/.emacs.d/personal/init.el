@@ -227,6 +227,11 @@
   ;; Default is basic partial-completion
   ;;(setq completion-styles '(partial-completion))
   ;;(add-to-list 'company-backends '(company-capf :with company-yasnippet))
+  ;; override idle delay for certain modes, otherwise it can be annoying
+  ;; when typing.
+  :hook
+  (org-mode . (lambda ()
+                (set (make-local-variable 'company-idle-delay) 0.4)))
   )
 
 ;; Company colour theme customisation

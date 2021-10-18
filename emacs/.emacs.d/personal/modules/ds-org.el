@@ -207,6 +207,10 @@
   (org-gcal-fetch)
   (org-agenda-redo-all))
 
+(defun ds-refresh-google-calendar ()
+  (interactive)
+  (org-gcal-request-token))
+
 ;; Redefine 'r' key on org-agenda to fetch google calendar events and update agenda.
 (define-key org-agenda-mode-map (kbd "r") 'ds-org-agenda-redo-with-gcal-refresh)
 

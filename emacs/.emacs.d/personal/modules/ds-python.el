@@ -274,6 +274,12 @@ override environment variables with our new PYTHONPATH."
                          (require 'lsp-pyright)
                          (lsp-deferred))))
 
+;;
+;; Emacs interface for Python poetry.
+;;
+(use-package poetry
+  :ensure t)
+
 (defun ds-python-elpy-shell-send-region-or-buffer-and-step (&optional arg)
   "Send selected region or buffer to python interpreter and then remove/
 deactive current selection. This is a wrapper around the function -
