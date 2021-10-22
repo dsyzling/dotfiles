@@ -486,6 +486,17 @@ if pytrader-stats is running close the buffer/process and restart"
                    :port 5678
                    :host "localhost")))
 
+(defun pytrader-stats-server ()
+  "Launch Pytrader Bokeh stats server for experiments.
+If pytrader-stats is running close the buffer/process and restart."
+  (interactive)
+  (message (getenv "PATH"))
+  (when (get-buffer "*pytrader-stats-server*")
+    (let ((kill-buffer-query-functions nil))
+      (kill-buffer "*pytrader-stats-server*")))
+  (ds-python-run-command
+   "pytrader_stats_server" "./" "*pytrader-stats-server*"))
+
 (defun ds-python-package-root ()
   "Return the top level package root directory of the current file buffer.
 Uses the workspace root to identify the top level directory and then parses
