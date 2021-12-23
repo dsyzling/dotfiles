@@ -107,6 +107,13 @@
       savehist-file (expand-file-name "savehist" ds-savefile-dir))
 (savehist-mode +1)
 
+;; xclip for console clipboard support.
+(use-package xclip
+  :ensure t
+  :config
+  (when (not (window-system))
+    (xclip-mode 1)))
+
 ;; Save file when we switch buffers or switch focus away from editor.
 ;; Do not do this for gpg encrypted files.
 (use-package super-save
