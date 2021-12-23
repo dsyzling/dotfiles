@@ -353,6 +353,9 @@
   :config
   ;;(lsp-ui-mode t)
   )
+;; When in console mode use arrow for breadcrumbs
+(when (not (window-system))
+  (setq lsp-headerline-arrow "=>"))
 
 (use-package helm-lsp
   :ensure t)
