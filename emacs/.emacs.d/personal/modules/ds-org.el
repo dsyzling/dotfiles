@@ -32,6 +32,7 @@
  '(
    (emacs-lisp . t)
    (python . t)
+   (R . t)
    ))
 
 ;;
@@ -64,7 +65,7 @@
            '(
              (:name "Today:"
                     :time-grid t
-                    :order 4)
+                    :order 5)
              (:name "Tasks:"
                     :and (:todo ("TODO"))
                     :order 1)
@@ -74,6 +75,10 @@
              (:name "To Watch:"
                     :and (:tag ("Watch"))
                     :order 3)
+             (:name "Study:"
+                    :and (:tag ("Study"))
+                    :order 4)
+
              ))
           (org-agenda-remove-tags t)
           (org-agenda-skip-timestamp-if-done t)
@@ -97,7 +102,53 @@
         ("c" "Completed Tasks" todo "DONE" nil)
         ("v" "21 day view" agenda "" ((org-agenda-span 21)))
         ("u" "Unscheduled tasks" todo "TODO"
-         ((org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled 'deadline))))))
+         ((org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled
+          'deadline))))))
+
+;; (setq org-agenda-custom-commands
+;;       '(("p" "Projects" tags "PROJECT" nil)
+;;         ("d" "Day's Agenda" agenda ""
+;;          ;; Define Agenda using org-super-agenda.
+;;          ;; Create TODO and Reading sections.
+;;          (
+;;           (org-super-agenda-groups
+;;            '(
+;;              (:name "Today:"
+;;                     :time-grid t
+;;                     :order 4)
+;;              (:name "Tasks:"
+;;                     :and (:todo ("TODO"))
+;;                     :order 1)
+;;              (:name "Reading:"
+;;                     :and (:tag ("Reading"))
+;;                     :order 2)
+;;              (:name "To Watch:"
+;;                     :and (:tag ("Watch"))
+;;                     :order 3)
+;;              ))
+;;           (org-agenda-remove-tags t)
+;;           (org-agenda-skip-timestamp-if-done t)
+;;           (org-agenda-skip-deadline-if-done t)
+;;           (org-agenda-start-day "+0d")
+;;           (org-agenda-span 1)
+;;           ;;(org-agenda-overriding-header " Calendar")
+;;           ;;(org-agenda-prefix-format "   %i %?-2 t%s")
+;;           (org-agenda-todo-keyword-format "")
+;;           (org-agenda-time)
+;;           (org-agenda-current-time-string "ᐊ┈┈┈┈┈┈┈ Now")
+;;           ;; remove the Scheduled text in our agenda.
+;;           (org-agenda-scheduled-leaders '("" ""))
+;;           (org-agenda-deadline-leaders '("Deadline: " "Deadline: "))
+;;           (org-agenda-time-grid (quote ((today require-timed remove-match) (0900 2100) "      " "┈┈┈┈┈┈┈┈┈┈┈┈┈")))
+;;           ))
+;;         ("w" "Waiting Tasks"  ((tags "WAITING")))
+;;         ("r" "Studying Tasks/Research"
+;;          ((tags-todo "study")
+;;           ))
+;;         ("c" "Completed Tasks" todo "DONE" nil)
+;;         ("v" "21 day view" agenda "" ((org-agenda-span 21)))
+;;         ("u" "Unscheduled tasks" todo "TODO"
+;;          ((org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled 'deadline))))))
 
 
 

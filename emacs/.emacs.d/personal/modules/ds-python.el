@@ -280,6 +280,26 @@ override environment variables with our new PYTHONPATH."
 (use-package poetry
   :ensure t)
 
+;;
+;; isort for sorting imports
+;; use py-isort-buffer
+;; or (add-hook 'before-save-hook 'py-isort-before-save)
+;;
+(use-package py-isort
+  :ensure t)
+
+;;
+;; Support for black for formattting.
+;;
+;; Requires black macchiato python package for
+;; region formatting.
+
+(use-package python-black
+  :demand t
+  :after python
+  ;; :hook (python-mode . python-black-on-save-mode-enable-dwim)
+  )
+
 (defun ds-python-elpy-shell-send-region-or-buffer-and-step (&optional arg)
   "Send selected region or buffer to python interpreter and then remove/
 deactive current selection. This is a wrapper around the function -
@@ -293,8 +313,8 @@ elpy-shell-send-region-or-buffer-and-step."
 ;;
 ;;(define-key elpy-mode-map (kbd "C-c C-f") 'helm-projectile-find-file)
 (define-key elpy-mode-map (kbd "C-c C-f") 'counsel-projectile-find-file)
-(define-key elpy-mode-map (kbd "C-M-.")   'helm-lsp-workspace-symbol)
-;;(define-key elpy-mode-map (kbd "C-M-.")   'lsp-ivy-workspace-symbol)
+;; (define-key elpy-mode-map (kbd "C-M-.")   'helm-lsp-workspace-symbol)
+(define-key elpy-mode-map (kbd "C-M-.")   'lsp-ivy-workspace-symbol)
 (define-key elpy-mode-map (kbd "C-c C-d") 'lsp-describe-thing-at-point)
 (define-key elpy-mode-map (kbd "M-.")     'lsp-find-definition)
 ;; Apply code action - useful for automatic imports in mspyls
@@ -420,6 +440,17 @@ will be passed on the command line."
                       root sysv-args script-file)))
     (compile cmd)))
 
+(defun ds-python-run-script (script-file &rest args)
+  "Run the given python script, output will be written to a compilation  
+buffer. SCRIPT-FILE contains the python file name and optional ARGS which
+will be passed on the command line."
+  (let* ((root (lsp-workspace-root))
+         (sysv-args (if args
+                        (format ";sys.argv=[sys.argv[0], %s];" (ds/python-list args))
+                      ";"))
+         (cmd (format "python -c \"import sys;import runpy;sys.path.append('%s') %s runpy.run_path('%s', run_name='__main__')\""
+                      root sysv-args script-file)))
+    (compile cmd)))
 
 (defun ds-python-run-current-buffer ()
   "Run the python script in the current buffer, output will be written to
@@ -442,6 +473,66 @@ Name the buffer based on the file name of the script being run."
       (rename-buffer new-buffer-name))
     (cd saved-dir)))
 
+(defun ds-python-profile-script (script-file &rest args)
+  "Profile the given python script, output will be written to a compilation  
+buffer. SCRIPT-FILE contains the python file name and optional ARGS which
+will be passed on the command line."
+  (let* ((root (lsp-workspace-root))
+         (cmd (format "python -m cProfile -s cumtime %s" script-file)))
+    (ds-python-run-command cmd "./" (format "*profile %s*" script-file))))
+
+(defun ds-python-profile-current-buffer ()
+  "Profile the python script in the current buffer, output will be written to
+a compilation buffer. The python script is executed with the fully qualified
+path and the current directory is set to the workspace root directory and
+restored after.  have encountered issues where the current directory
+can contain modules with the same name as site-packages (mypy/types).
+Name the buffer based on the file name of the script being run."
+  (interactive)
+  (let* ((root (lsp-workspace-root))
+         (current-path (expand-file-name (buffer-file-name)))
+         (current-file (file-name-nondirectory current-path))
+         (new-buffer-name (format "*%s*" current-file))
+         (saved-dir default-directory))
+    (cd root)
+    (when (get-buffer new-buffer-name)
+      (kill-buffer new-buffer-name))
+    (ds-python-profile-script current-path)
+    (with-current-buffer "*compilation*"
+      (rename-buffer new-buffer-name))
+    (cd saved-dir)))
+
+(defun ds-python-line-profile-script (script-file &rest args)
+  "Profile the given python script, output will be written to a compilation  
+buffer. SCRIPT-FILE contains the python file name and optional ARGS which
+will be passed on the command line."
+  (let* ((root (lsp-workspace-root))
+         (cmd (format "kernprof -l %s; python -m line_profiler %s.lprof"
+                      script-file
+                      (file-name-nondirectory script-file))))
+    (ds-python-run-command cmd "./" (format "*profile %s*" script-file))))
+
+(defun ds-python-line-profile-current-buffer ()
+  "Use line_profiler to profile the script in the current buffer, output will be written to
+a compilation buffer. The python script is executed with the fully qualified
+path and the current directory is set to the workspace root directory and
+restored after.  have encountered issues where the current directory
+can contain modules with the same name as site-packages (mypy/types).
+Name the buffer based on the file name of the script being run."
+  (interactive)
+  (let* ((root (lsp-workspace-root))
+         (current-path (expand-file-name (buffer-file-name)))
+         (current-file (file-name-nondirectory current-path))
+         (new-buffer-name (format "*%s*" current-file))
+         (saved-dir default-directory))
+    (cd root)
+    (when (get-buffer new-buffer-name)
+      (kill-buffer new-buffer-name))
+    (ds-python-line-profile-script current-path)
+    (with-current-buffer "*compilation*"
+      (rename-buffer new-buffer-name))
+    (cd saved-dir)))
+
 (defun ds-python-run-command (cmd working-dir new-buffer-name)
   "Run the command CMD in the given WORKING-DIR relative to the top level
 workspace directory. This function ensures PYTHONPATH is updated with
@@ -460,16 +551,25 @@ buffer to NEW_BUFFER-NAME after the process has started"
       (rename-buffer new-buffer-name))
     (cd saved-dir)))
 
-
 (defun pytrader-stats ()
   "Launch Pytrader Bokeh stats server for experiments.
 If pytrader-stats is running close the buffer/process and restart."
   (interactive)
   (when (get-buffer "*pytrader-stats*")
     (let ((kill-buffer-query-functions nil))
-    (kill-buffer "*pytrader-stats*")))
+      (kill-buffer "*pytrader-stats*")))
   (ds-python-run-command
    "python -m bokeh serve experiments stats markets" "pytrader/plot" "*pytrader-stats*"))
+
+(defun pytrader-stats-server ()
+  "Launch Pytrader Bokeh stats server for experiments.
+If pytrader-stats is running close the buffer/process and restart."
+  (interactive)
+  (when (get-buffer "*pytrader-stats-server*")
+    (let ((kill-buffer-query-functions nil))
+      (kill-buffer "*pytrader-stats-server*")))
+  (ds-python-run-command
+   "pytrader_stats_server" "./" "*pytrader-stats-server*"))
 
 (defun debug-pytrader-stats ()
   "Debug launch Pytrader Bokeh stats server for experiments.
@@ -485,17 +585,6 @@ if pytrader-stats is running close the buffer/process and restart"
                    :request "attach"
                    :port 5678
                    :host "localhost")))
-
-(defun pytrader-stats-server ()
-  "Launch Pytrader Bokeh stats server for experiments.
-If pytrader-stats is running close the buffer/process and restart."
-  (interactive)
-  (message (getenv "PATH"))
-  (when (get-buffer "*pytrader-stats-server*")
-    (let ((kill-buffer-query-functions nil))
-      (kill-buffer "*pytrader-stats-server*")))
-  (ds-python-run-command
-   "pytrader_stats_server" "./" "*pytrader-stats-server*"))
 
 (defun ds-python-package-root ()
   "Return the top level package root directory of the current file buffer.

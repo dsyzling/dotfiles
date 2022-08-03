@@ -31,6 +31,9 @@
 ;; Avoid bad request and TLS issues when refreshing packages. 
 (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
 
+;; Emacs 29 native compilation build - disable showing warnings as default.
+(setq warning-minimum-level :error)
+
 (require 'package)
 (add-to-list 'package-archives
              '("melpa" . "https://melpa.org/packages/") t)
