@@ -265,6 +265,48 @@
 ;; Redefine 'r' key on org-agenda to fetch google calendar events and update agenda.
 (define-key org-agenda-mode-map (kbd "r") 'ds-org-agenda-redo-with-gcal-refresh)
 
+;;
+;; Wrapper around C-c C-c function for orgmode -
+;; Check if we're in a code block and a region is highlighted,
+;; if this code block is python then send it to ipython.
+;; Otherwise call the original orgmode function to execute the
+;; code block.
+;; This allows us to prototype and execute code within code blocks
+;; and see results in ipython.
+;;
+(defun ds-org-ctrl-c-ctrl-c ()
+  "Execute python code region highlighted in orgmode file (send to ipython)
+or if no region highlighted delegate to org-ctrl-c-ctrl-c"
+  (interactive)
+  (if-let* ((info (org-babel-get-src-block-info)))
+      (let* ((language (car info)))
+        (if (and (equal language "python")
+                 (use-region-p))
+            (ds-ipython-shell-send-region
+             (region-beginning) (region-end) current-prefix-arg t)
+          (org-ctrl-c-ctrl-c)))
+    (org-ctrl-c-ctrl-c)))
+
+;;
+;; Wrapper for (org-add-note) - which is bound to C-c C-z
+;; Allow us to open ipython when we're within a python source
+;; code block.
+;;
+(defun ds-org-add-note ()
+  "Open IPython if we're within a python source code and orgmode buffer.
+Otherwise delegate to the default org-add-note."
+  (interactive)
+  (if-let* ((info (org-babel-get-src-block-info)))
+      (let* ((language (car info)))
+        (if (equal language "python")
+            (elpy-shell-switch-to-shell)
+          (org-add-note)))
+    (org-add-note)))
+
+;; Redefine C-c C-c for orgmode to call our wrapper above.
+(define-key org-mode-map (kbd "C-c C-c") 'ds-org-ctrl-c-ctrl-c)
+(define-key org-mode-map (kbd "C-c C-z") 'ds-org-add-note)
+
 (defun ds-open-calendar ()
   "Open calfw calendar and show google calendar events and scheduled org-mode tasks."
   (interactive)
@@ -427,6 +469,38 @@
 ;;
 (use-package org-download
   :ensure t)
+
+;;
+;; Formatting support for code in org html export
+;;
+(use-package htmlize
+  :ensure t
+  :after ox
+  :config
+  (setq org-html-htmlize-output-type 'css))
+
+;;
+;; Research papers - orgmode, babel, latex 
+;;
+
+;; Use minted to highlight source code
+(setq org-latex-listings 'minted
+      org-latex-packages-alist '(("" "minted")))
+
+;; Our minted options.
+(setq org-latex-minted-options      
+      '(("breaklines" "true")
+        ("tabsize" "4")
+        ("autogobble")
+        ("linenos")
+        ("numbersep" "0.5cm")
+        ("xleftmargin" "1cm")
+        ("frame" "single")))
+        
+;; -shell-escape required for minted.
+(setq org-latex-pdf-process
+      '("latexmk -f -pdf -%latex -shell-escape -interaction=nonstopmode
+-output-directory=%o %f"))
 
 
 (provide 'ds-org)
