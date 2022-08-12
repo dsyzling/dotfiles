@@ -434,19 +434,7 @@ buffer. SCRIPT-FILE contains the python file name and optional ARGS which
 will be passed on the command line."
   (let* ((root (lsp-workspace-root))
          (sysv-args (if args
-                        (format ";sys.argv=[sys.argv[0], %s];" (ds/python-list args))
-                      ";"))
-         (cmd (format "python -c \"import sys;import runpy;sys.path.append('%s') %s runpy.run_path('%s', run_name='__main__')\""
-                      root sysv-args script-file)))
-    (compile cmd)))
-
-(defun ds-python-run-script (script-file &rest args)
-  "Run the given python script, output will be written to a compilation  
-buffer. SCRIPT-FILE contains the python file name and optional ARGS which
-will be passed on the command line."
-  (let* ((root (lsp-workspace-root))
-         (sysv-args (if args
-                        (format ";sys.argv=[sys.argv[0], %s];" (ds/python-list args))
+                        (format ";sys.argv=['%s', %s];" script-file (ds/python-list args))
                       ";"))
          (cmd (format "python -c \"import sys;import runpy;sys.path.append('%s') %s runpy.run_path('%s', run_name='__main__')\""
                       root sysv-args script-file)))
@@ -571,20 +559,44 @@ If pytrader-stats is running close the buffer/process and restart."
   (ds-python-run-command
    "pytrader_stats_server" "./" "*pytrader-stats-server*"))
 
-(defun debug-pytrader-stats ()
-  "Debug launch Pytrader Bokeh stats server for experiments.
-if pytrader-stats is running close the buffer/process and restart"
+(defun debug-pytrader-stats-server ()
+  "Debug Pytrader Bokeh stats server for experiments.
+If pytrader-stats-server is running close the buffer/process and restart."
   (interactive)
-  (when (get-buffer "*pytrader-stats*")
+  (when (get-buffer "*debug-pytrader-stats-server*")
     (let ((kill-buffer-query-functions nil))
-    (kill-buffer "*pytrader-stats*")))
-  (ds-python-run-command
-   "python -m debugpy --listen localhost:5678 --wait-for-client -m bokeh serve experiments stats markets" "pytrader/plot" "*debug-pytrader-stats*")
-  (dap-debug (list :name "Python Attach"
-                   :type "python"
-                   :request "attach"
-                   :port 5678
-                   :host "localhost")))
+      (kill-buffer "*debug-pytrader-stats-server*")))
+  ;; must be run from the root workspace - has issues
+  ;; finding types imported from ./experiments.
+  (let* ((root (lsp-workspace-root))
+         (saved-dir default-directory))
+    (cd root)
+    (ds-python-run-script "pytrader/plot/server.py" "--debug")
+    ;; Can't get this to work using debugpy wrapper module - causes
+    ;; issues trying to dynamically load experiments.trend_follower module.
+    ;; (ds-python-run-command
+    ;;  "python -m debugpy --listen localhost:5678 --wait-for-client pytrader/plot/server.py" "./" "*debug-pytrader-stats-server*")
+    (dap-debug (list :name "Python Attach"
+                     :type "python"
+                     :request "attach"
+                     :port 5678
+                     :host "localhost"))
+    (cd saved-dir)))
+
+;; (defun debug-pytrader-stats ()
+;;   "Debug launch Pytrader Bokeh stats server for experiments.
+;; if pytrader-stats is running close the buffer/process and restart"
+;;   (interactive)
+;;   (when (get-buffer "*pytrader-stats*")
+;;     (let ((kill-buffer-query-functions nil))
+;;     (kill-buffer "*pytrader-stats*")))
+;;   (ds-python-run-command
+;;    "python -m debugpy --listen localhost:5678 --wait-for-client -m bokeh serve experiments stats markets" "pytrader/plot" "*debug-pytrader-stats*")
+;;   (dap-debug (list :name "Python Attach"
+;;                    :type "python"
+;;                    :request "attach"
+;;                    :port 5678
+;;                    :host "localhost")))
 
 (defun ds-python-package-root ()
   "Return the top level package root directory of the current file buffer.
