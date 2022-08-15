@@ -374,6 +374,8 @@
   :ensure t
   :defer t
   :config
+  ;; Pythn debugger can be debugpy or ptvsd (now deprecated)
+  (setq dap-python-debugger 'debugpy)
   ;; Don't show breakpoints on initial display for debugger.
   (setq dap-auto-configure-features '(sessions locals expressions controls tooltip repl))
   (dap-auto-configure-mode)

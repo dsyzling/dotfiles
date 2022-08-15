@@ -264,9 +264,7 @@ override environment variables with our new PYTHONPATH."
         lsp-pyright-multi-root nil
         ;; off basic or strict - basic is the default.
         ;; lsp-pyright-typechecking-mode "strict"
-        lsp-pyright-venv-path "/home/dsyzling/miniconda3/envs"
-        ;; Debugger can be debugpy or ptvsd (now deprecated)
-        dap-python-debugger 'debugpy)
+        lsp-pyright-venv-path "/home/dsyzling/miniconda3/envs")
   ;; Ensure if we're running mypy that generated files do not cause change
   ;; notifications otherwise this leads to recurring diagnostic checks.
   (push "[/\\\\]\\.mypy_cache\\'" lsp-file-watch-ignored-directories)
