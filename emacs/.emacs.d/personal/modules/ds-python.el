@@ -298,6 +298,17 @@ override environment variables with our new PYTHONPATH."
   ;; :hook (python-mode . python-black-on-save-mode-enable-dwim)
   )
 
+;;
+;; Sphinx-doc mode.
+;; bound to C-c M-d
+;;
+(use-package sphinx-doc
+  :demand t
+  :after python
+  :init (add-hook 'python-mode-hook #'sphinx-doc-mode)
+  :config
+  (setq sphinx-doc-include-types t))
+
 (defun ds-python-elpy-shell-send-region-or-buffer-and-step (&optional arg)
   "Send selected region or buffer to python interpreter and then remove/
 deactive current selection. This is a wrapper around the function -
