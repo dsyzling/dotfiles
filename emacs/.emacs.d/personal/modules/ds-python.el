@@ -592,6 +592,20 @@ If pytrader-stats-server is running close the buffer/process and restart."
                      :host "localhost"))
     (cd saved-dir)))
 
+(defun ds-pytrader-project (directory)
+  "Switch and activate PyTrader project. Prompts for a project directory
+and runs a .pytrader-project.el file if it exists. This file should
+set the virtual environment directory along with environment vars.
+Specifically PYTHON_PATH should be set to include the PyTrader
+directory if you are working in a research project and wish to continue
+to work on PyTrader code. Secondly set PYTRADER_DATA to the project directory
+so that data is stored locally within this directory."
+  (interactive (list (read-directory-name "Project directory")))
+  (let* ((proj-file (concat directory ".pytrader-project.el")))
+    (if (file-exists-p proj-file)
+        (load proj-file))))
+
+
 ;; (defun debug-pytrader-stats ()
 ;;   "Debug launch Pytrader Bokeh stats server for experiments.
 ;; if pytrader-stats is running close the buffer/process and restart"
@@ -657,7 +671,7 @@ ipython-shell-send-region"
   "Switch interpreter to ipython."
   (interactive)
   (setq python-shell-interpreter "ipython"
-        python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True")
+        python-shell-interpreter-args "-i --no-autoindent --InteractiveShell.display_page=True --matplotlib")
   (define-key elpy-mode-map
     (kbd "C-c C-c")
     'ds-ipython-shell-send-region))
