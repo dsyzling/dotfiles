@@ -483,6 +483,154 @@ Otherwise delegate to the default org-add-note."
 ;; Research papers - orgmode, babel, latex 
 ;;
 
+(require 'org)
+(require 'ox-html)
+(require 'base64)
+
+;; Define our html premble to show author, date, title etc.
+;; latex will automatically include these with various templates
+;; when configired.
+;; We should be ale to use %a for author name here and define
+;; it within the org document. But for this to work we need
+;; to update the arxiv.sty file to specify company name, title
+;; and email address - possibly via affil
+;;
+(setq org-html-preamble-format
+      '(("en" "<div style=\"margin: auto;text-align: center;\">
+<em>Darren Syzling</em><br />
+Senior Research and Development Engineer <br />
+Wimmer Horizon LLP <br />
+%e<br />
+<p>
+%d
+</p>
+</div>")))
+
+;;
+;; Register our own template function for exporting to html
+;; for academic papers. This allows us to reorganise the preamble
+;; after the title - so we can display name, company, email and
+;; date after template. The default is to display this above the
+;; the title and there's no way to modify the template or reorder.
+;; ds-org-academic-paper-html-template
+;;
+;; C-c C-e a h
+;; export 'academic papers' then h for html file.
+;;
+(defun ds/org-academic-paper-html-template (contents info)
+  "Copied from ox-html.el - org-html-template, we've modified
+the order of preamable to include it before after title and
+before the body's contents.
+Return complete document string after HTML conversion.
+CONTENTS is the transcoded contents string.  INFO is a plist
+holding export options."
+  (concat
+   (when (and (not (org-html-html5-p info)) (org-html-xhtml-p info))
+     (let* ((xml-declaration (plist-get info :html-xml-declaration))
+	    (decl (or (and (stringp xml-declaration) xml-declaration)
+		      (cdr (assoc (plist-get info :html-extension)
+				  xml-declaration))
+		      (cdr (assoc "html" xml-declaration))
+		      "")))
+       (when (not (or (not decl) (string= "" decl)))
+	 (format "%s\n"
+		 (format decl
+			 (or (and org-html-coding-system
+				  (fboundp 'coding-system-get)
+				  (coding-system-get org-html-coding-system 'mime-charset))
+			     "iso-8859-1"))))))
+   (org-html-doctype info)
+   "\n"
+   (concat "<html"
+	   (cond ((org-html-xhtml-p info)
+		  (format
+		   " xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"%s\" xml:lang=\"%s\""
+		   (plist-get info :language) (plist-get info :language)))
+		 ((org-html-html5-p info)
+		  (format " lang=\"%s\"" (plist-get info :language))))
+	   ">\n")
+   "<head>\n"
+   (org-html--build-meta-info info)
+   (org-html--build-head info)
+   (org-html--build-mathjax-config info)
+   "</head>\n"
+   "<body>\n"
+   (let ((link-up (org-trim (plist-get info :html-link-up)))
+	 (link-home (org-trim (plist-get info :html-link-home))))
+     (unless (and (string= link-up "") (string= link-home ""))
+       (format (plist-get info :html-home/up-format)
+	       (or link-up link-home)
+	       (or link-home link-up))))
+   ;; Document contents.
+   (let ((div (assq 'content (plist-get info :html-divs))))
+     (format "<%s id=\"%s\" class=\"%s\">\n"
+             (nth 1 div)
+             (nth 2 div)
+             (plist-get info :html-content-class)))
+   ;; Document title.
+   (when (plist-get info :with-title)
+     (let ((title (and (plist-get info :with-title)
+		       (plist-get info :title)))
+	   (subtitle (plist-get info :subtitle))
+	   (html5-fancy (org-html--html5-fancy-p info)))
+       (when title
+	 (format
+	  (if html5-fancy
+	      "<header>\n<h1 class=\"title\">%s</h1>\n%s</header>"
+	    "<h1 class=\"title\">%s%s</h1>\n")
+	  (org-export-data title info)
+	  (if subtitle
+	      (format
+	       (if html5-fancy
+		   "<p class=\"subtitle\" role=\"doc-subtitle\">%s</p>\n"
+		 (concat "\n" (org-html-close-tag "br" nil info) "\n"
+			 "<span class=\"subtitle\">%s</span>\n"))
+	       (org-export-data subtitle info))
+	    "")))))
+   ;; Preamble.
+   (org-html--build-pre/postamble 'preamble info)
+   contents
+   (format "</%s>\n" (nth 1 (assq 'content (plist-get info :html-divs))))
+   ;; Postamble.
+   (org-html--build-pre/postamble 'postamble info)
+   ;; Possibly use the Klipse library live code blocks.
+   (when (plist-get info :html-klipsify-src)
+     (concat "<script>" (plist-get info :html-klipse-selection-script)
+	     "</script><script src=\""
+	     org-html-klipse-js
+	     "\"></script><link rel=\"stylesheet\" type=\"text/css\" href=\""
+	     org-html-klipse-css "\"/>"))
+   ;; Closing document.
+   "</body>\n</html>"))
+
+(defun ds/org-academic-paper-html-export-to-html
+    (&optional async subtreep visible-only body-only ext-plist)
+  "Export our academic paper format to html - i.e.
+call our custom html template function above by specifying
+the type we're exporting - 'academic-paper-html which is
+registered above"
+  (interactive)
+  (let* ((extension (concat
+		     (when (> (length org-html-extension) 0) ".")
+		     (or (plist-get ext-plist :html-extension)
+			 org-html-extension
+			 "html")))
+	 (file (org-export-output-file-name extension subtreep))
+	 (org-export-coding-system org-html-coding-system))
+    (org-export-to-file 'academic-paper-html file
+      async subtreep visible-only body-only ext-plist)))
+
+;;
+;; Register a new org export backend for html (derived from html) and include
+;; a new menu option for exporting academic papers.
+;; 
+(org-export-define-derived-backend 'academic-paper-html 'html
+  :translate-alist '((template . ds/org-academic-paper-html-template))
+  :menu-entry
+    '(?a "Export to Academic HTML Paper"
+         ((?h "As HTML file" ds/org-academic-paper-html-export-to-html))))
+
+
 ;; Use minted to highlight source code
 (setq org-latex-listings 'minted
       org-latex-packages-alist '(("" "minted")))
@@ -499,8 +647,85 @@ Otherwise delegate to the default org-add-note."
         
 ;; -shell-escape required for minted.
 (setq org-latex-pdf-process
-      '("latexmk -f -pdf -%latex -shell-escape -interaction=nonstopmode
--output-directory=%o %f"))
+      '("latexmk -f -pdf -%latex -shell-escape -interaction=nonstopmode -output-directory=%o %f"))
 
+
+;;
+;; Generate inline html images for exporting orgmode docs to html.
+;; from:
+;; https://emacs.stackexchange.com/questions/28781/export-to-single-html-file-like-reveal-single-filet-in-regular-html-export
+;; TODO - update so that we can enable/disable this with a function.
+;; default will be disabled.
+;;
+
+(defcustom org-html-image-base64-max-size #x40000
+  "Export embedded base64 encoded images up to this size."
+  :type 'number
+  :group 'org-export-html)
+
+(defun file-to-base64-string (file &optional image prefix postfix)
+  "Transform binary file FILE into a base64-string prepending PREFIX and appending POSTFIX.
+Puts \"data:image/%s;base64,\" with %s replaced by the image type before the actual image data if IMAGE is non-nil."
+  (concat prefix
+      (with-temp-buffer
+        (set-buffer-multibyte nil)
+        (insert-file-contents file nil nil nil t)
+        (base64-encode-region (point-min) (point-max) 'no-line-break)
+        (when image
+          (goto-char (point-min))
+          (insert (format "data:image/%s;base64," (image-type-from-file-name file))))
+        (buffer-string))
+      postfix))
+
+(defun orgTZA-html-base64-encode-p (file)
+  "Check whether FILE should be exported base64-encoded.
+The return value is actually FILE with \"file://\" removed if it is a prefix of FILE."
+  (when (and (stringp file)
+             (string-match "\\`file://" file))
+    (setq file (substring file (match-end 0))))
+  (and
+   (file-readable-p file)
+   (let ((size (nth 7 (file-attributes file))))
+     (<= size org-html-image-base64-max-size))
+   file))
+
+(defun orgTZA-html--format-image (source attributes info)
+  "Return \"img\" tag with given SOURCE and ATTRIBUTES.
+SOURCE is a string specifying the location of the image.
+ATTRIBUTES is a plist, as returned by
+`org-export-read-attribute'.  INFO is a plist used as
+a communication channel."
+  (if (string= "svg" (file-name-extension source))
+      (org-html--svg-image source attributes info)
+    (let* ((file (orgTZA-html-base64-encode-p source))
+           (data (if file (file-to-base64-string file t)
+                   source)))
+      (org-html-close-tag
+       "img"
+       (org-html--make-attribute-string
+        (org-combine-plists
+         (list :src data
+               :alt (if (string-match-p "^ltxpng/" source)
+                        (org-html-encode-plain-text
+                         (org-find-text-property-in-string 'org-latex-src source))
+                      (file-name-nondirectory source)))
+         attributes))
+       info))))
+
+(advice-add 'org-html--format-image :override #'orgTZA-html--format-image)
+
+;;
+;;org-cliplink - copy links to orgmode docs
+;;
+(use-package org-cliplink
+  :ensure t)
+
+;;
+;; org-download - download images from web browsers and file system,
+;; drag and drop images into orgmode docs and copy files to local directory
+;; near org doc.
+;;
+(use-package org-download
+  :ensure t)
 
 (provide 'ds-org)
