@@ -487,6 +487,14 @@ Otherwise delegate to the default org-add-note."
 (require 'ox-html)
 (require 'base64)
 
+;;
+;; use ox-gfm so that we can export to markdown with
+;; with github syntax for code blocks.
+;;
+(use-package ox-gfm)
+(eval-after-load "org"
+  '(require 'ox-gfm nil t))
+
 ;; Define our html premble to show author, date, title etc.
 ;; latex will automatically include these with various templates
 ;; when configired.
@@ -727,5 +735,25 @@ a communication channel."
 ;;
 (use-package org-download
   :ensure t)
+
+;;
+;; there are issues with these notification methods
+;; they cause issues with org-agenda when hitting the tab key
+;; marker-p nil periodically.
+;;
+;;
+;; org-mode notification
+;;
+;; (use-package org-notifications
+;;   :ensure t)
+;; (setq alert-default-style 'libnotify
+;;       alert-fade-time 60000)
+;; (org-notifications-start)
+
+;; (use-package org-alert
+;;   :ensure t
+;;   :config
+;;   (setq alert-default-style 'libnotify))
+;; (org-alert-enable)
 
 (provide 'ds-org)
