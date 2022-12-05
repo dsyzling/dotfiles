@@ -318,6 +318,26 @@ elpy-shell-send-region-or-buffer-and-step."
   (deactivate-mark))
 
 ;;
+;; pretty print objects in python repl.
+;; Requires adding a definition of ppretty to ipython_config.py file.
+;; c.InteractiveShellApp.exec_lines = [
+;;     "%autoreload 2",
+;;     """
+;;     from ppretty import ppretty as ppretty_temp
+;;     def ppretty(obj):
+;;         print(ppretty_temp(obj, seq_length=99, show_properties=True, depth=3), end='')
+;;     """
+;; ] 
+;;
+(defun ds/print-python-object-fields-in-repl ()
+  "Sends symbol at point to IPython REPL with the `ppretty' function defined in ipython_config.
+Lists the object's non-method fields and their respective current values."
+  (interactive)
+  (let ((sym (symbol-at-point)))
+    (python-shell-send-string
+     (format "print(); print('=> %s'); ppretty(%s)" sym sym))))
+
+;;
 ;; Define key map for python mode with lsp
 ;;
 ;;(define-key elpy-mode-map (kbd "C-c C-f") 'helm-projectile-find-file)
@@ -334,6 +354,14 @@ elpy-shell-send-region-or-buffer-and-step."
 (define-key elpy-mode-map (kbd "C-c C-c") 'ds-python-elpy-shell-send-region-or-buffer-and-step)
 (define-key elpy-mode-map (kbd "M-RET") 'helm-lsp-code-actions)
 (define-key elpy-mode-map (kbd "C-c C-r") 'lsp-ui-peek-find-references)
+(define-key elpy-mode-map (kbd "C-c C-o") 'ds/print-python-object-fields-in-repl)
+
+;; Also note the following keys to eval python for repl driven development
+;;
+;; | C-c C-z   | open or go to oppen repl                                             |
+;; | C-c C-c   | eval buffer or region selection                                      |
+;; | C-c C-y e | eval current statement - useful to eval current line or function     |
+;; | C-c C-y s | eval top statement or enclosing scope - useful for function or class |
 
 ;; Customise flycheck.
 ;; Conda on Windows has already moved to using python rather than python3
@@ -671,7 +699,7 @@ ipython-shell-send-region"
   "Switch interpreter to ipython."
   (interactive)
   (setq python-shell-interpreter "ipython"
-        python-shell-interpreter-args "-i --no-autoindent --InteractiveShell.display_page=True --matplotlib")
+        python-shell-interpreter-args "-i --simple-prompt --no-autoindent --InteractiveShell.display_page=True --matplotlib")
   (define-key elpy-mode-map
     (kbd "C-c C-c")
     'ds-ipython-shell-send-region))
