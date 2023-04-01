@@ -166,7 +166,28 @@ override environment variables with our new PYTHONPATH."
   (plist-put conf :environment-variables `(("PYTHONPATH" . ,(lsp-workspace-root))))
   conf)
 
-(dap-register-debug-provider "python-run-with-python-path" 'dap-python-run-buffer-with-pythonpath)
+(defun dap-python-run-buffer-as-module (conf)
+  "Run the current file buffer as a python module for dap-debug
+so that we can import modules from the current project."
+  ;; populate conf
+  (dap-python--populate-start-file-args conf)
+  ;; extract file buffer script, convert to a file relative to
+  ;; workspace root. Convert this file to a module - drop .py extension
+  ;; and change path separators to '.'
+  (let ((program (plist-get conf :program)))
+    (plist-put conf :module
+               (replace-regexp-in-string "/" "."
+                                         (file-name-sans-extension
+                                          (file-relative-name program (lsp-workspace-root)))))
+    (plist-put conf :program nil)
+    (plist-put conf :cwd (lsp-workspace-root))
+    (plist-put conf :environment-variables
+               `(("PYTHONPATH" . ,(lsp-workspace-root)))))
+  ;; process our new module entry so debugger will be called correctly.
+  (dap-python--populate-start-file-args conf)
+  conf)
+
+(dap-register-debug-provider "python-run-with-python-path" 'dap-python-run-buffer-as-module)
 (dap-register-debug-template "DS Python :: Run file (buffer)"
                              (list :type "python-run-with-python-path"
                                    :args ""
