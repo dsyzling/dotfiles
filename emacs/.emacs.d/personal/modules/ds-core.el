@@ -172,7 +172,7 @@
 ;;
 (require 'flyspell)
 (flyspell-mode-on)
-(ispell-change-dictionary "en_GB")
+(ispell-change-dictionary "british")
 
 ;; Colour compilation buffers and shells based on terminal type.
 ;; https://github.com/atomontage/xterm-color
