@@ -64,7 +64,7 @@
               ("C-c C-d" . lsp-describe-thing-at-point)
               ("RET"     . 'scala-mode-newline-comments)
               ("M-RET"   . 'helm-lsp-code-actions)
-              ("C-c-C-r" . lsp-ui-peek-find-references)
+              ("C-c C-r" . lsp-ui-peek-find-references)
               ))
 
 ;; Add metals backend for lsp-mode
@@ -235,7 +235,7 @@ to perform the run action."
          (ensime-top-level-class-closest-to-point)))
     (if mainClass
         (bloop--run-current-buffer mainClass)
-      (return "Could not find top-level class"))))
+      (cl-return "Could not find top-level class"))))
 
 ;;
 ;; You can explicitly run main classes in scala projects using the follow form:
