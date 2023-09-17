@@ -28,11 +28,22 @@
 
 (add-to-list 'load-path ds-modules-dir)
 
+;; When using nvm to manage node for pyright on nix platforms we
+;; need to inherit the shell exec-path changes
+(when (memq window-system '(mac ns x))
+  (exec-path-from-shell-initialize))
+
+
 ;; Avoid bad request and TLS issues when refreshing packages. 
 (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
 
 ;; Emacs 29 native compilation build - disable showing warnings as default.
 (setq warning-minimum-level :error)
+
+;; Emacs 29 compilation buffer introduced a line length which then truncates
+;; output with [..] - this seems to be triggered by python progress bars
+; so I've disabled this option for now.
+(setq compilation-max-output-line-length nil)
 
 (require 'package)
 (add-to-list 'package-archives
@@ -424,7 +435,7 @@
 ;;
 ;; Clojure/Clojurescript development configuration
 ;;
-(require 'ds-clojure)
+;; (require 'ds-clojure)
 
 ;;
 ;; Scala development configuration
@@ -435,6 +446,17 @@
 ;; Python development configuration, company-jedi for completion.
 ;;
 (require 'ds-python)
+
+;; (setq
+;;  lsp-pylance-langserver-command
+;;  '("/home/dsyzling/.vscode/extensions/ms-python.vscode-pylance-2021.9.0/dist/server.bundle.js")
+;;  lsp-pylance-use-library-code-for-types t
+;;  ;; lsp-pyright-venv-path "/home/dsyzling/miniconda3/envs"
+;;  )
+;; (require 'ds-pylance)
+;; ;; Test using pylance
+;; (setf (lsp--client-priority (ht-get lsp-clients 'pyright)) 1)
+;; (setf (lsp--client-priority (ht-get lsp-clients 'pylance)) 0)
 
 ;;
 ;; Java development configuration with lsp-mode
@@ -458,6 +480,15 @@
 (setq doc-view-resolution 300)
 
 ;;
+;; mastodon
+;;
+;; (setq mastodon-instance-url "https://fosstodon.org"
+;;       mastodon-active-user "dsyzling")
+;; (use-package mastodon
+;;     :ensure t)
+;;
+
+
 ;; global keys
 ;;
 ;; reindent automatically when return is pressed
