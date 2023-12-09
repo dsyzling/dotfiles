@@ -260,9 +260,15 @@
 
 ;; Mood-lone mode - sort out by mode line
 (use-package mood-line
-  :ensure t
-  :init
-  (mood-line-mode))
+
+  ;; Enable mood-line
+  :config
+  (mood-line-mode)
+
+  ;; Use pretty Fira Code-compatible glyphs
+  ;; :custom
+  ;; (mood-line-glyph-alist mood-line-glyphs-fira-code)
+  )
 
 (set-face-background 'mode-line "#000000")
 (set-face-foreground 'mode-line "#FEFEFE")
