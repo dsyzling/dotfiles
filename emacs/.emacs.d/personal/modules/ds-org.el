@@ -423,7 +423,7 @@ Otherwise delegate to the default org-add-note."
 (use-package org-roam
   :ensure t
   :config
-  (org-roam-setup)
+  (org-roam-db-autosync-mode)
   :custom
   (org-roam-directory (expand-file-name "deft" sync-home ))
   :bind (("C-c n l" . org-roam-buffer-toggle)
