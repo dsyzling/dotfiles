@@ -495,6 +495,27 @@ Otherwise delegate to the default org-add-note."
 (eval-after-load "org"
   '(require 'ox-gfm nil t))
 
+;; citeproc required to allow us to use csl styles
+;; with orgmode html export.
+(use-package citeproc
+  :ensure t)
+
+;; part of orgmode define what processor to use for exporting citations.
+(setq org-cite-export-processors
+ '((md . (csl "chicago-fullnote-bibliography.csl"))       ; Footnote reliant
+   (latex biblatex)                                       ; For pdf
+   (odt . (csl "chicago-fullnote-bibliography.csl"))      ; Footnote reliant
+   (t . (csl "chicago-fullnote-bibliography.csl"))))      ; Fallback
+
+;; not sure where zotero styles are but you can download
+;; styles from the following repos
+;; https://github.com/citation-style-language/styles
+;; then refer to this directory or add the style file
+;; to the same directory as the org file
+;; #+CITE_EXPORT: csl chicago-author-date.csl
+;; (org-cite-csl-styles-dir
+;;  (expand-file-name "~/Documents/Zotero/styles/"))
+
 ;; Define our html premble to show author, date, title etc.
 ;; latex will automatically include these with various templates
 ;; when configired.
