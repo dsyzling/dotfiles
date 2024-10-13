@@ -17,6 +17,12 @@
 ;; In the meantime we use the pyls-mypy third party plugin (pip install pyls-mypy)
 ;; and control the activation with these variables.
 ;;
+(require 'flycheck)
+
+;; use Ruff for linting within emacs - use the lsp-ruff server.
+;; (require 'lsp-ruff)
+
+
 (defcustom lsp-pyls-plugins-mypy-enabled t
   "Enable or disable the plugin."
   :type 'boolean
@@ -147,8 +153,10 @@ your changes for mypy diagnostics to update correctly."
 (setenv "WORKON_HOME"
       (pcase system-type
         ('windows-nt "f:/util/miniconda3/envs")
-        ('gnu/linux  "~/miniconda3/envs")
+        ;; ('gnu/linux  "~/miniconda3/envs)
+        ('gnu/linux  "/home/dsyzling/.pyenv/versions")
         ('darwin     "~/miniconda3/envs")))
+
 
 ;; use dap for debugging - this will make sure the dap run configurations
 ;; are available for python - pytest and main. 
@@ -384,16 +392,31 @@ Lists the object's non-method fields and their respective current values."
 ;; | C-c C-y e | eval current statement - useful to eval current line or function     |
 ;; | C-c C-y s | eval top statement or enclosing scope - useful for function or class |
 
+;;
+;; Using python-ruff after lsp diagnostic for flycheck.
+;;
+
 ;; Customise flycheck.
 ;; Conda on Windows has already moved to using python rather than python3
 ;; within environments, flycheck defaults to using python3 so we need to
 ;; customise linters.
-(setq-default flycheck-python-flake8-executable "python")
-(setq-default flycheck-python-pylint-executable "python")
+;; (setq-default flycheck-python-flake8-executable "python")
+;; (setq-default flycheck-python-pylint-executable "python")
 
 ;; Customise flycheck checkers used within specific language modes.
 ;; For python when using pyright we'll chain flake8 and mypy.
 ;;TODO - move flycheck-local-cache and functions to a common area so
+;; leaving these functions examples in case we need them in future.
+;; (add-to-list 'flycheck-disabled-checkers 'python-pylint)
+;; (add-to-list 'flycheck-disabled-checkers 'python-pycompile)
+;;(add-to-list 'flycheck-disabled-checkers 'python-mypy)
+;; (setq my/flycheck-local-cache
+;;       '((python-pylint . ((next-checkers . ())))))
+;; (setf (flycheck-checker-get 'python-flake8 'next-checkers) nil)
+;; (setq my/flycheck-local-cache
+;;       '((lsp . ((next-checkers . (python-flake8 python-mypy))))))
+;; (setf (flycheck-checker-get 'python-flake8 'next-checkers) '(python-mypy))
+;; (setf (flycheck-checker-get 'python-flake8 'next-checkers) nil)
 ;; we can use this approach in multiple language modes.
 ;; from https://github.com/flycheck/flycheck/issues/1762
 (defvar-local my/flycheck-local-cache nil)
@@ -407,20 +430,11 @@ Lists the object's non-method fields and their respective current values."
 (add-hook 'lsp-managed-mode-hook
           (lambda ()
             (when (derived-mode-p 'python-mode)
-              ;; Disable flycheck checkers we're not using
-              (add-to-list 'flycheck-disabled-checkers 'python-pylint)
-              (add-to-list 'flycheck-disabled-checkers 'python-pycompile)
-              ;; disable mypy and use pyright type checking - can't seem
-              ;; to exclude mypy cache from pyright file system watch.
-              ;;(add-to-list 'flycheck-disabled-checkers 'python-mypy)
-              (setf (flycheck-checker-get 'python-flake8 'next-checkers) '(python-mypy))
+              (setq-local flycheck-python-mypy-config "pyproject.toml")
               (setq my/flycheck-local-cache
-                    '((lsp . ((next-checkers . (python-flake8)))))))))
+                    '((lsp . ((next-checkers . (python-ruff))))))
+              )))
 
-;;
-;; switch servers to use either Palentir (pyls) or the Microsoft Python
-;; language server mspyls by updating the registered client priority.
-;;
 
 (defvar ds/lsp-flycheck-checkers (ht))
 
@@ -641,19 +655,17 @@ If pytrader-stats-server is running close the buffer/process and restart."
                      :host "localhost"))
     (cd saved-dir)))
 
-(defun ds-pytrader-project (directory)
-  "Switch and activate PyTrader project. Prompts for a project directory
-and runs a .pytrader-project.el file if it exists. This file should
-set the virtual environment directory along with environment vars.
-Specifically PYTHON_PATH should be set to include the PyTrader
-directory if you are working in a research project and wish to continue
-to work on PyTrader code. Secondly set PYTRADER_DATA to the project directory
-so that data is stored locally within this directory."
+
+(defun ds-uv-project (directory)
+  "Switch and activate a uv managed project. Prompts for a project directory
+and runs pyvenv-activate on the .venv directory within the directory. 
+Optionally you can add a .project.el to set environment variables for 
+the project."
   (interactive (list (read-directory-name "Project directory")))
-  (let* ((proj-file (concat directory ".pytrader-project.el")))
+  (let* ((proj-file (concat directory ".project.el")))
+    (pyvenv-activate (concat directory ".venv"))
     (if (file-exists-p proj-file)
         (load proj-file))))
-
 
 ;; (defun debug-pytrader-stats ()
 ;;   "Debug launch Pytrader Bokeh stats server for experiments.
