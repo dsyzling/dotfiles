@@ -20,7 +20,9 @@
 (require 'flycheck)
 
 ;; use Ruff for linting within emacs - use the lsp-ruff server.
-;; (require 'lsp-ruff)
+(require 'lsp-ruff)
+
+;; (setq-default lsp-ruff-show-notifications "always")
 
 
 (defcustom lsp-pyls-plugins-mypy-enabled t
