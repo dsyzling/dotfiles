@@ -326,6 +326,7 @@
   :bind (:map lsp-mode-map
               ;; ("TAB" . company-indent-or-complete-common)
               ("C-c C-h" . lsp-ui-doc-show)
+              ("M-RET" . lsp-execute-code-action)
               ))
 ;; Use C-Windows-l to bring up lsp-mode kep map
 ;; Keys defined here: https://emacs-lsp.github.io/lsp-mode/page/keybindings/
