@@ -47,6 +47,26 @@
 (defvar ds-org-archive (expand-file-name "archive/%s_archive::" sync-home)
     "Task archive location.")
 
+;;
+;; Some of our packages can only be installed with straight directly
+;; from github
+;;
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name
+        "straight/repos/straight.el/bootstrap.el"
+        (or (bound-and-true-p straight-base-dir)
+            user-emacs-directory)))
+      (bootstrap-version 7))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
 ;; config changes made through the customize UI will be stored here
 (setq custom-file (expand-file-name "custom.el" ds-init-dir))
 
@@ -88,50 +108,16 @@
 ;; lisp editing defaults.
 (require 'ds-lisp)
 
-;; Use counsel/swiper with ivy
-(use-package counsel :ensure t)
+;; Vertico completion customisation.
+(require 'ds-vertico)
 
-;; Use counsel with projectile - define projectile prefix key.
-(use-package counsel-projectile :ensure t
-  :config
-  (counsel-projectile-mode)
-  (setq projectile-completion-system 'ivy)
-  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
-
-(use-package ivy :ensure t
-  :diminish (ivy-mode . "")
-  :bind
-  (:map ivy-mode-map
-        ("C-'" . ivy-avy)
-        ("C-J" . ivy-im)
-        )
-  :config
-  (ivy-mode 1)
-  ;; add ‘recentf-mode’ and bookmarks to ‘ivy-switch-buffer’.
-  (setq ivy-use-virtual-buffers t)
-  (setq enable-recursive-minibuffers t)
-  ;; number of result lines to display
-  (setq ivy-height 10)
-  ;; does not count candidates
-  (setq ivy-count-format "%d/%d")
-  ;; no regexp by default
-  (setq ivy-initial-inputs-alist nil)
-  ;; configure regexp engine.
-  (setq ivy-re-builders-alist
-	;; allow input not in order
-        '((t   . ivy--regex-ignore-order))
-         ))
-
-;; Use ivy-avy to trigger lens actions in lsp-mode
-(use-package ivy-avy :ensure t)
+;; corfu for completion
+(require 'ds-corfu)
 
 ;;
 ;; org-mode customisation module.
 ;;
 (require 'ds-org)
-
-;; Use helm mode everywhere
-;;(helm-mode 1)
 
 ;; ;; TODO - remove these prelude definitions.
 ;; ;; Disable undo-tree, slowing down saving large orgmode buffers and
@@ -247,31 +233,6 @@
 (setq gnus-init-file (expand-file-name "gnus/.gnus.el" sync-home))
 (setq gnus-startup-file (expand-file-name "gnus/.newsrc" sync-home))
 
-;;
-;; Company mode customisation.
-;;
-(use-package company
-  :ensure t
-  :config
-  ;; Reduce company idle delay for completion
-  (setq company-idle-delay 0.2
-        company-minimum-prefix-length 2
-        company-tooltip-align-annotations t
-        company-tooltip-minimum-width 50
-        company-icon-size 20)
-  :init
-  (global-company-mode 1)
-  ;; In case we want to override completion style -
-  ;; Default is basic partial-completion
-  ;;(setq completion-styles '(partial-completion))
-  ;;(add-to-list 'company-backends '(company-capf :with company-yasnippet))
-  ;; override idle delay for certain modes, otherwise it can be annoying
-  ;; when typing.
-  :hook
-  (org-mode . (lambda ()
-                (set (make-local-variable 'company-idle-delay) 0.4)))
-  )
-
 ;; Company colour theme customisation
 (require 'color)
 (let ((bg (face-attribute 'default :background)))
@@ -343,10 +304,11 @@
   ;; :load-path "~/projects/emacs/lsp-mode/"
   ;;:hook (lsp-mode . lsp-lens-mode)
   :init
+  (setq lsp-keymap-prefix "C-c l")
   :config
-  (setq lsp-prefer-capf  t
-        completion-ignore-case t
-
+  (setq completion-ignore-case t
+        ;; lsp-prefer-capf  t
+        
         ;; auto enable lens mode
         lsp-lens-enable t
         ;; default is after-line however lsp-avy-lens assumes the position
@@ -362,7 +324,7 @@
   ;; all-the-icons.
   (set-face-attribute 'mode-line nil :font "Hack-9")
   :bind (:map lsp-mode-map
-              ("TAB" . company-indent-or-complete-common)
+              ;; ("TAB" . company-indent-or-complete-common)
               ("C-c C-h" . lsp-ui-doc-show)
               ))
 ;; Use C-Windows-l to bring up lsp-mode kep map
@@ -415,10 +377,6 @@
 (when (not (window-system))
   (setq lsp-headerline-arrow "=>"))
 
-(use-package helm-lsp
-  :ensure t)
-
-(use-package lsp-ivy :ensure t)
 
 (use-package markdown-mode
   :ensure t)
