@@ -237,7 +237,7 @@
 (add-to-list 'auto-mode-alist '("\\.php$" . php-mode))
 (add-to-list 'auto-mode-alist '("\\.inc$" . php-mode))
 
-;; GPG 2.2.x - now uses pinentry with a different interface - this change allows
+;; GPG 2.2.x - now gpg uses pinentry with a different interface - this change allows
 ;; mini buffer entry of the passphrase
 ;;  https://colinxy.github.io/software-installation/2016/09/24/emacs25-easypg-issue.html
 (setq epa-pinentry-mode 'loopback)
@@ -282,6 +282,7 @@
    `(company-tooltip-selection ((t (:background ,(color-lighten-name bg 10)))))
    `(company-tooltip-common ((t (:inherit font-lock-constant-face))))))
 
+
 ;; Mood-lone mode - sort out by mode line
 (use-package mood-line
 
@@ -325,6 +326,18 @@
         (window-height . 0.25)
         (reusable-frames . nil)))))
 
+;;
+;; treesitter
+;; auto configure and install treesitter language files
+;;
+(use-package treesit-auto
+  :ensure t
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
+
 (use-package lsp-mode
   :ensure t
   ;; :load-path "~/projects/emacs/lsp-mode/"
@@ -342,6 +355,7 @@
         ;; Performance suggestions recommended for lsp-mode
         ;; https://emacs-lsp.github.io/lsp-mode/page/performance/
         gc-cons-threshold 100000000
+        gc-cons-percentage 0.5
         read-process-output-max (* 1024 1024) ;; 1mb
         )
   ;; the modeline may require icons from lsp-treemacs and will fallback to
@@ -551,3 +565,9 @@
 ;; https://github.com/emacs-helm/helm/wiki/FAQ#arrow-keys-behavior-have-changed
 ;; (define-key helm-map (kbd "<left>") 'helm-previous-source)
 ;; (define-key helm-map (kbd "<right>") 'helm-next-source)
+
+; direnv mode allows automatic loading of direnv variables
+(use-package direnv
+  :ensure t
+  :config
+  (direnv-mode))

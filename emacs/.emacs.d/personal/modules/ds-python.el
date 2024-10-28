@@ -301,7 +301,11 @@ so that we can import modules from the current project."
   (push "[/\\\\]\\.mypy_cache\\'" lsp-file-watch-ignored-directories)
   :hook (python-mode . (lambda ()
                          (require 'lsp-pyright)
-                         (lsp-deferred))))
+                         (lsp-deferred)))
+  :hook (python-ts-mode . (lambda ()
+                            (require 'lsp-pyright)
+                            (lsp-deferred)))
+  )
 
 ;;
 ;; Emacs interface for Python poetry.
@@ -337,6 +341,7 @@ so that we can import modules from the current project."
   :demand t
   :after python
   :init (add-hook 'python-mode-hook #'sphinx-doc-mode)
+  (add-hook 'python-ts-mode-hook #'sphinx-doc-mode)
   :config
   (setq sphinx-doc-include-types t))
 
@@ -431,7 +436,7 @@ Lists the object's non-method fields and their respective current values."
 
 (add-hook 'lsp-managed-mode-hook
           (lambda ()
-            (when (derived-mode-p 'python-mode)
+            (when (or  (derived-mode-p 'python-ts-mode) (derived-mode-p 'python-mode))
               (setq-local flycheck-python-mypy-config "pyproject.toml")
               (setq my/flycheck-local-cache
                     '((lsp . ((next-checkers . (python-ruff))))))
