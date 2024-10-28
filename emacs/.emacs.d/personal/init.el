@@ -1,6 +1,30 @@
 ;;; init.el --- My customisations for Emacs
 ;;
 
+;; Set the frame size according to pixels and not based on the size of the font.
+(setq frame-resize-pixelwise t)
+
+;; Inhibit resizing the frame when changing the font
+(setq frame-inhibit-implied-resize t)
+
+;; make sure that UTF-8 is used everywhere.
+(set-terminal-coding-system  'utf-8)
+(set-keyboard-coding-system  'utf-8)
+(set-language-environment    'utf-8)
+(set-selection-coding-system 'utf-8)
+(setq locale-coding-system   'utf-8)
+(prefer-coding-system        'utf-8)
+(set-input-method nil)
+
+;; Use this only on laptops...
+(unless (string-match-p "^Power N/A" (battery))
+  ;; it's nice to know how much power you have
+  (display-battery-mode 1)
+  )
+
+;; personal laptop
+(defvar my-laptop-p (equal (system-name) "dsarchie"))
+
 ;; Paths for our configuration modules.
 (defvar ds-init-dir (file-name-directory load-file-name)
   "The root dir of my Emacs configuration files.")
