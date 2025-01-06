@@ -206,6 +206,19 @@ so that we can import modules from the current project."
                                    :program nil
                                    :request "launch"
                                    :name "DS Python :: Run file (buffer)"))
+;;
+;; Override dap-python.el definitions for python-test at point -
+;; these are incorrectly defined type should be specified as
+;; :type "python-test-at-point"
+;;
+(dap-register-debug-provider "python-test-at-point" 'dap-python--populate-test-at-point)
+(dap-register-debug-template "Python :: Run pytest (at point)"
+                             (list :type "python-test-at-point"
+                                   :args ""
+                                   :program nil
+                                   :module "pytest"
+                                   :request "launch"
+                                   :name "Python :: Run pytest (at point)"))
 
 ;; Temporary fix to align output buffer for our debug template above.
 ;; Position the output window at the bottom of our screen.
@@ -334,16 +347,37 @@ so that we can import modules from the current project."
   )
 
 ;;
+;; numpydoc mode - Python doc strings using numpy/google formatting.
+;; https://github.com/douglasdavis/numpydoc.el
+;; https://google.github.io/styleguide/pyguide.html#doc-function-raises
+;; 
+(use-package numpydoc
+  :ensure t
+  :bind (:map python-mode-map
+              ("C-c M-d" . numpydoc-generate)))
+
+;;
 ;; Sphinx-doc mode.
 ;; bound to C-c M-d
 ;;
-(use-package sphinx-doc
-  :demand t
-  :after python
-  :init (add-hook 'python-mode-hook #'sphinx-doc-mode)
-  (add-hook 'python-ts-mode-hook #'sphinx-doc-mode)
-  :config
-  (setq sphinx-doc-include-types t))
+;; (use-package sphinx-doc
+;;   :demand t
+;;   :after python
+;;   :init (add-hook 'python-mode-hook #'sphinx-doc-mode)
+;;   (add-hook 'python-ts-mode-hook #'sphinx-doc-mode)
+;;   :config
+;;   (setq sphinx-doc-include-types t))
+
+;; Consider py-vterm in future requires
+;; emacs-libvterm to be compiled and installed
+;;   https://github.com/akermu/emacs-libvterm
+;; (use-package py-vterm-interaction
+;;   :hook (python-mode . py-vterm-interaction-mode)
+;;   :config
+;;   ;;; Suggested:
+;;   (setq-default py-vterm-interaction-repl-program "ipython")
+;;   ;; (setq-default py-vterm-interaction-silent-cells t)
+;;   )
 
 (defun ds-python-elpy-shell-send-region-or-buffer-and-step (&optional arg)
   "Send selected region or buffer to python interpreter and then remove/

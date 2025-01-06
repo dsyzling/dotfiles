@@ -21,7 +21,10 @@
              (flyspell-mode t)
              (turn-on-auto-fill)
              (set-fill-column 80)
-             (prettify-symbols-mode)))
+             (prettify-symbols-mode)
+             ;; disable company mode for org mode - completions
+             ;; in this mode can be annoying.
+             (company-mode 0)))
 
 ;; org files will use utf-8 by default
 (modify-coding-system-alist 'file "\.org\'" 'utf-8)

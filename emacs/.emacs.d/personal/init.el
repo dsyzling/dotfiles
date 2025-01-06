@@ -307,7 +307,7 @@
   (setq lsp-keymap-prefix "C-c l")
   :config
   (setq completion-ignore-case t
-        ;; lsp-prefer-capf  t
+        lsp-prefer-capf  t
         
         ;; auto enable lens mode
         lsp-lens-enable t
