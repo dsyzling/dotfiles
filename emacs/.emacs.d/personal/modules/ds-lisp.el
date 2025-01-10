@@ -19,7 +19,6 @@
 (defun ds-lisp-coding-defaults ()
   (rainbow-delimiters-mode +1)
   (eldoc-mode +1)
-  (rainbow-mode +1)
   (enable-paredit-mode))
 
 (define-key emacs-lisp-mode-map (kbd "C-c C-c") 'eval-defun)
