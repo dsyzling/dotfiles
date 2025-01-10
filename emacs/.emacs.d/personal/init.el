@@ -108,12 +108,6 @@
 ;; lisp editing defaults.
 (require 'ds-lisp)
 
-;; Vertico completion customisation.
-(require 'ds-vertico)
-
-;; corfu for completion
-(require 'ds-corfu)
-
 ;;
 ;; org-mode customisation module.
 ;;
@@ -444,6 +438,12 @@
 ;; Scala development configuration
 ;;
 (require 'ds-scala)
+
+;; corfu for completion
+(require 'ds-corfu)
+
+;; Vertico completion customisation.
+(require 'ds-vertico)
 
 ;;
 ;; Python development configuration, company-jedi for completion.
