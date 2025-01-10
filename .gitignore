@@ -1,0 +1,6 @@
+emacs/.emacs.d/.cache/
+emacs/.emacs.d/.org-generic-id-locations
+emacs/.emacs.d/eln-cache
+emacs/.emacs.d/org-roam.db
+emacs/.emacs.d/straight/
+emacs/.emacs.d/transient/
