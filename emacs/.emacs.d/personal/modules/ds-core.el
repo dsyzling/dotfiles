@@ -61,7 +61,15 @@
 ;; Use electric-pair mode
 (electric-pair-mode 1)
 
+;; Flycheck mode.
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode))
+
 ;; show available keybindings after you start typing
+;; Can be removed in Emacs 30.
+(use-package which-key
+  :ensure t)
 (require 'which-key)
 (which-key-mode +1)
 
@@ -82,14 +90,6 @@
 
 ;; smart tab behavior - indent or complete
 ;;(setq tab-always-indent 'complete)
-
-;; smart parens for all
-(require 'smartparens-config)
-(setq sp-base-key-bindings 'paredit)
-(setq sp-autoskip-closing-pair 'always)
-(setq sp-hybrid-kill-entire-symbol nil)
-(sp-use-paredit-bindings)
-(show-smartparens-global-mode +1)
 
 ;; saveplace remembers your location in a file when saving files
 (setq save-place-file (expand-file-name "saveplace" ds-savefile-dir))
@@ -139,6 +139,7 @@
       bookmark-save-flag 1)
 
 ;; projectile is a project management mode
+(use-package projectile :ensure t)
 (require 'projectile)
 (setq projectile-cache-file (expand-file-name  "projectile.cache" ds-savefile-dir))
 (projectile-mode t)
@@ -156,6 +157,7 @@
   (add-hook 'prog-mode-hook 'flycheck-mode))
 
 ;; font-lock annotations like TODO in source code
+(use-package hl-todo :ensure t)
 (require 'hl-todo)
 (global-hl-todo-mode 1)
 

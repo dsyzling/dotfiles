@@ -8,7 +8,8 @@
 ;;; Customisation of Emacs Lisp defaults.
 
 ;;; Code:
-
+(use-package rainbow-delimiters :ensure t)
+(use-package paredit :ensure t)
 (require 'rainbow-delimiters)
 (require 'paredit)
 
@@ -16,7 +17,6 @@
 (define-key read-expression-map (kbd "TAB") 'completion-at-point)
 
 (defun ds-lisp-coding-defaults ()
-  (smartparens-strict-mode +1)
   (rainbow-delimiters-mode +1)
   (eldoc-mode +1)
   (rainbow-mode +1)

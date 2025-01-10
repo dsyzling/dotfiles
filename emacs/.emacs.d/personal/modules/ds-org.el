@@ -228,6 +228,15 @@
 ;;
 ;; calfw for calendar - integrate google calendar and org-mode schedules.
 ;;
+(use-package calfw
+  :config
+  (require 'calfw)
+  (require 'calfw-org)
+  (setq cfw:org-overwrite-default-keybinding t)
+  (setq cfw:render-line-breaker-wordwrap 'cfw:render-line-breaker-wordwrap)
+  (require 'calfw-ical)
+  :ensure t)
+
 (use-package calfw-ical
   :config
   (require 'calfw-ical)
@@ -238,14 +247,6 @@
   (require 'calfw-org)
   :ensure t)
 
-(use-package calfw
-  :config
-  (require 'calfw)
-  (require 'calfw-org)
-  (setq cfw:org-overwrite-default-keybinding t)
-  (setq cfw:render-line-breaker-wordwrap 'cfw:render-line-breaker-wordwrap)
-  (require 'calfw-ical)
-  :ensure t)
 
 ;; Note org-gcal-client-id and org-gcal-client-secret defined within ds-secrets.el
 (use-package org-gcal
