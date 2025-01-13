@@ -17,6 +17,11 @@ places
 savefile/
 projectile-bookmarks.eld
 session*
+*.lsp-session*
+*.dap-breakpoints
+tree-sitter/*
+*.org-id-locations*
+workspace/*
 .cask
 tramp
 /var/pcache
