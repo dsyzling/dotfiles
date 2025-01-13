@@ -114,7 +114,7 @@
 ;; (setq corfu-auto        t
 ;;       corfu-auto-delay  0.25 
 ;;       corfu-auto-prefix 2 
-;;       completion-styles '(basic))
+;;       completion-styles '(basic orderless))
 
 
 
