@@ -366,6 +366,9 @@ so that we can import modules from the current project."
 ;;
 (use-package uv-mode
   :hook (python-mode . ds-uv-mode-auto-activate-hook))
+;; Apply to treesitter python mode.
+(use-package uv-mode
+  :hook (python-ts-mode . ds-uv-mode-auto-activate-hook))
 
 (require 'uv-mode)
 (defun ds-uv-mode-auto-activate-hook ()
@@ -373,7 +376,7 @@ so that we can import modules from the current project."
 This is my custom version using uv-mode, we extend this to optionally 
 execute a project.el file in the project root directory to set 
 environment variables etc."
-  (when (derived-mode-p 'python-mode)
+  (when (or (derived-mode-p 'python-mode) (derived-mode-p 'python-ts-mode))
     (let ((project-root (uv-mode-root)))
       (when project-root
         ;; uv-mode setting env with pythonic doesn't appear to
@@ -387,7 +390,6 @@ environment variables etc."
         (let* ((proj-file (concat project-root ".project.el")))
           (if (file-exists-p proj-file)
               (load proj-file)))))))
-
 
 ;;
 ;; Sphinx-doc mode.
