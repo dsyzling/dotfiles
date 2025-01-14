@@ -170,20 +170,19 @@ export NVM_DIR="$HOME/.nvm"
 # }
 
 # to support conda as well as venv.
-show_virtual_env() {
-  if [[ $(pyenv local 2>/dev/null) == *"conda"* ]]; then
-     VENV=$CONDA_DEFAULT_ENV
-  else
-     VENV=$VIRTUAL_ENV
-  fi
-  if [[ -n "$VENV" && -n "$DIRENV_DIR" ]]; then
-     echo "($(basename $VENV))"
-  fi
-}
-PS1='$(show_virtual_env)'$PS1
+# Only use if we're not using direnv
+# show_virtual_env() {
+#   if [[ $(pyenv local 2>/dev/null) == *"conda"* ]]; then
+#      VENV=$CONDA_DEFAULT_ENV
+#   else
+#      VENV=$VIRTUAL_ENV
+#   fi
+#   if [[ -n "$VENV" && -n "$DIRENV_DIR" ]]; then
+#      echo "($(basename $VENV))"
+#   fi
+# }
+# PS1='$(show_virtual_env)'$PS1
 
 # hook direnv into shell
 eval "$(direnv hook zsh)"
 
-# add uv to the path - added by installer.
-. "$HOME/.cargo/env"
