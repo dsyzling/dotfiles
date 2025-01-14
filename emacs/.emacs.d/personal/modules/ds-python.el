@@ -357,6 +357,33 @@ so that we can import modules from the current project."
               ("C-c M-d" . numpydoc-generate)))
 
 ;;
+;; uv mode for auto activating virtual envs with .venv directories.
+;;   https://github.com/z80dev/uv-mode
+;;
+(use-package uv-mode
+  :hook (python-mode . ds-uv-mode-auto-activate-hook))
+
+(require 'uv-mode)
+(defun ds-uv-mode-auto-activate-hook ()
+  "Automatically activate UV mode and the project's virtualenv if available.
+This is my custom version using uv-mode, we extend this to optionally 
+execute a project.el file in the project root directory to set 
+environment variables etc."
+  (when (derived-mode-p 'python-mode)
+    (let ((project-root (uv-mode-root)))
+      (when project-root
+        ;; uv-mode setting env with pythonic doesn't appear to
+        ;; work for me and current lsp-mode setup.
+        (pyvenv-activate (concat project-root ".venv"))
+        (uv-mode 1)                     ; Enable uv-mode
+        (uv-mode-set)
+        ;; if there's a custom Emacs project file load it. 
+        (let* ((proj-file (concat project-root ".project.el")))
+          (if (file-exists-p proj-file)
+              (load proj-file)))))))
+
+
+;;
 ;; Sphinx-doc mode.
 ;; bound to C-c M-d
 ;;
