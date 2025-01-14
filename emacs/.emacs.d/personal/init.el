@@ -113,6 +113,14 @@
 ;;
 (require 'ds-org)
 
+;;
+;; magit customisation
+;; Turn on spell checking
+;;
+(use-package magit
+  :hook ((git-commit-mode . flyspell-mode)))
+
+
 ;; ;; TODO - remove these prelude definitions.
 ;; ;; Disable undo-tree, slowing down saving large orgmode buffers and
 ;; ;; I've never really used it.
