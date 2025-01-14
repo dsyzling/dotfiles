@@ -360,6 +360,10 @@ so that we can import modules from the current project."
 ;; uv mode for auto activating virtual envs with .venv directories.
 ;;   https://github.com/z80dev/uv-mode
 ;;
+;; Currently we have deactivated uv-mode (or not activated it)
+;; since it makes changes to the keymap which are not reversed
+;; when using another mode - i.e. orgmode-map
+;;
 (use-package uv-mode
   :hook (python-mode . ds-uv-mode-auto-activate-hook))
 
@@ -375,8 +379,10 @@ environment variables etc."
         ;; uv-mode setting env with pythonic doesn't appear to
         ;; work for me and current lsp-mode setup.
         (pyvenv-activate (concat project-root ".venv"))
-        (uv-mode 1)                     ; Enable uv-mode
-        (uv-mode-set)
+        ;; For now do not activate uv-mode since this conflicts with
+        ;; orgmode-map keys - C-c C-s - schedule task.
+        ;; (uv-mode 1)                     ; Enable uv-mode
+        ;; (uv-mode-set)
         ;; if there's a custom Emacs project file load it. 
         (let* ((proj-file (concat project-root ".project.el")))
           (if (file-exists-p proj-file)
