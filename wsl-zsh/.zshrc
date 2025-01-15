@@ -186,3 +186,7 @@ export NVM_DIR="$HOME/.nvm"
 # hook direnv into shell
 eval "$(direnv hook zsh)"
 
+# Issue with WSL and Ubuntu falling back to using X11 rather than Wayland.
+# Wayland will provide the smoother fonts on hidpi displays
+#   https://github.com/microsoft/wslg/issues/1244
+ln -sf //mnt/wslg/runtime-dir/wayland-* $XDG_RUNTIME_DIR//
