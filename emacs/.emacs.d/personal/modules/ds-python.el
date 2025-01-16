@@ -445,22 +445,15 @@ Lists the object's non-method fields and their respective current values."
      (format "print(); print('=> %s'); ppretty(%s)" sym sym))))
 
 ;;
-;; Define key map for python mode with lsp
+;; Define key map for python mode with lsp - we need to override some keys
+;; that are currently mapped by elpy.
 ;;
-;; (define-key elpy-mode-map (kbd "C-c C-f") 'counsel-projectile-find-file)
-(define-key elpy-mode-map (kbd "C-c C-f") 'consult-projectile-find-file)
-;; (define-key elpy-mode-map (kbd "C-M-.")   'helm-lsp-workspace-symbol)
-(define-key elpy-mode-map (kbd "C-M-.")   'consult-lsp-symbols)
-;; (define-key elpy-mode-map (kbd "C-M-.")   'lsp-ivy-workspace-symbol)
 (define-key elpy-mode-map (kbd "C-c C-d") 'lsp-describe-thing-at-point)
-(define-key elpy-mode-map (kbd "M-.")     'lsp-find-definition)
-;; Apply code action - useful for automatic imports in mspyls
-;; also see - lsp-ui-sideline-apply-code-actions
-(define-key elpy-mode-map (kbd "M-RET")   'lsp-execute-code-action)
+(define-key elpy-mode-map (kbd "C-c C-r") 'lsp-ui-peek-find-references)
+
 ;; Override default elpy key binding to send selection or buffer to python interpreter.
 ;; I want to remove the selection after executing.
 (define-key elpy-mode-map (kbd "C-c C-c") 'ds-python-elpy-shell-send-region-or-buffer-and-step)
-(define-key elpy-mode-map (kbd "C-c C-r") 'lsp-ui-peek-find-references)
 (define-key elpy-mode-map (kbd "C-c C-o") 'ds/print-python-object-fields-in-repl)
 
 ;; Also note the following keys to eval python for repl driven development

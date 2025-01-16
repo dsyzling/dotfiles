@@ -459,6 +459,16 @@
 ;;
 (require 'ds-python)
 
+;;
+;; Temporary fix for breaking API change in consult whic hmeans consult-lsp
+;; doesn't work.
+;;   https://github.com/gagbo/consult-lsp/issues/44
+;;
+;; Use Ivy instead for now.
+;;
+(use-package lsp-ivy :ensure t)
+(define-key elpy-mode-map (kbd "C-M-.")   'lsp-ivy-workspace-symbol)
+
 ;; (setq
 ;;  lsp-pylance-langserver-command
 ;;  '("/home/dsyzling/.vscode/extensions/ms-python.vscode-pylance-2021.9.0/dist/server.bundle.js")
@@ -500,7 +510,7 @@
 ;;     :ensure t)
 ;;
 
-
+;;
 ;; global keys
 ;;
 ;; reindent automatically when return is pressed
@@ -510,6 +520,23 @@
 (global-set-key (kbd "C--") 'text-scale-decrease)
 (global-set-key (kbd "C-x j") 'avy-goto-char)
 (global-set-key (kbd "C-c a") 'org-agenda)
+
+;;
+;; keys that I want to apply to all of our programming modes
+;;
+;; consult-lsp currently does not work due to breaking API change
+;; Temporarily using ivy instead.
+;; (define-key lsp-mode-map (kbd "C-M-.")   'consult-lsp-symbols)
+(define-key lsp-mode-map (kbd "C-M-.")   'lsp-ivy-workspace-symbol)
+
+(define-key lsp-mode-map (kbd "C-c C-f") 'consult-projectile-find-file)
+(define-key lsp-mode-map (kbd "C-c C-d") 'lsp-describe-thing-at-point)
+(define-key lsp-mode-map (kbd "M-.")     'lsp-find-definition)
+;; Apply code action - useful for automatic imports in mspyls
+;; also see - lsp-ui-sideline-apply-code-actions
+(define-key lsp-mode-map (kbd "M-RET")   'lsp-execute-code-action)
+(define-key lsp-mode-map (kbd "C-c C-r") 'lsp-ui-peek-find-references)
+
 ;; define a set of basic keys to allow us simple debug navigation.
 (with-eval-after-load 'dap-mode
   (define-key dap-mode-map (kbd "<f8>") 'dap-next)
