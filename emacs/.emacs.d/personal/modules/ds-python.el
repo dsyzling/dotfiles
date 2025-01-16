@@ -132,7 +132,9 @@ your changes for mypy diagnostics to update correctly."
         ;; Use pytest by default
         elpy-test-runner 'elpy-test-pytest-runner)
   :init
-  (elpy-enable))
+  (elpy-enable)
+  ;; activate for treesitter python mode
+  (add-hook 'python-ts-mode-hook 'elpy-mode))
 
 ;; Enable pylint and flake8, disable pyflakes.
 (setq lsp-pyls-plugins-pylint-enabled nil
