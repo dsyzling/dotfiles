@@ -1,6 +1,3 @@
-# If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:/usr/local/bin:$PATH
-
 # start tmux automatically - this causes issues with Emacs
 # so we start Tilix with -e tmux to auto start tmux on our terminal app.
 #export ZSH_TMUX_AUTOSTART=true
@@ -14,52 +11,11 @@ export ZSH="/home/dsyzling/.oh-my-zsh"
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
 ZSH_THEME="robbyrussell"
 
-# Set list of themes to pick from when loading at random
-# Setting this variable when ZSH_THEME=random will cause zsh to load
-# a theme from this variable instead of looking in ~/.oh-my-zsh/themes/
-# If set to an empty array, this variable will have no effect.
-# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
-
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
-
-# Uncomment the following line to use hyphen-insensitive completion.
-# Case-sensitive completion must be off. _ and - will be interchangeable.
-# HYPHEN_INSENSITIVE="true"
-
 # Uncomment the following line to disable bi-weekly auto-update checks.
 # DISABLE_AUTO_UPDATE="true"
 
 # Uncomment the following line to change how often to auto-update (in days).
 # export UPDATE_ZSH_DAYS=13
-
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
-
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
-
-# Uncomment the following line to enable command auto-correction.
-# ENABLE_CORRECTION="true"
-
-# Uncomment the following line to display red dots whilst waiting for completion.
-# COMPLETION_WAITING_DOTS="true"
-
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
-
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# You can set one of the optional three formats:
-# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# or set a custom format using the strftime function format specifications,
-# see 'man strftime' for details.
-# HIST_STAMPS="mm/dd/yyyy"
-
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
 
 # Which plugins would you like to load?
 # Standard plugins can be found in ~/.oh-my-zsh/plugins/*
@@ -73,9 +29,6 @@ plugins=(
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
-
-# export MANPATH="/usr/local/man:$MANPATH"
-
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
 
@@ -85,35 +38,6 @@ source $ZSH/oh-my-zsh.sh
 # else
 #   export EDITOR='mvim'
 # fi
-
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
-
-# ssh
-# export SSH_KEY_PATH="~/.ssh/rsa_id"
-
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
-
-# pip should only run if there is a virtualenv currently activated
-# Temporarily removing, so we can test pip inside conda.
-#export PIP_REQUIRE_VIRTUALENV=true
-
-# create commands to override pip restriction.
-# use `gpip` or `gpip3` to force installation of
-# a package in the global python environment
-gpip(){
-    PIP_REQUIRE_VIRTUALENV="" pip "$@"
-}
-gpip3(){
-    PIP_REQUIRE_VIRTUALENV="" pip3 "$@"
-}
 
 # opt out of dotnet telemetry being sent to MS
 export DOTNET_CLI_TELEMETRY_OPTOUT=true
@@ -131,10 +55,6 @@ fi
 # Testing removing Windows paths to speed up Emacs.
 export PATH="/home/dsyzling/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games"
 
-# keychain and ssh-agent for caching git keys
-# eval ``keychain --eval --agents ssh id_rsa
-# source ~/.keychain/$HOSTNAME-sh
-
 # Scale GTK apps on hidpi screens - on ubuntu 20.x
 # this has to be an integer based scaler, combine with
 # -dide.ui.scale in JVM applications which can be a non integer
@@ -148,7 +68,6 @@ export PATH="/home/dsyzling/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:
 export DISPLAY=:0
 
 # update keyboard repeat rate for x-windows
-# xset r rate 200 250
 xset r rate 200 100
 
 export NVM_DIR="$HOME/.nvm"
@@ -159,29 +78,6 @@ export NVM_DIR="$HOME/.nvm"
 # export PYDEVD_DEBUG=true
 # export DEBUGPY_LOG_DIR="/home/dsyzling/dev/vscodelog"
 # export PYDEVD_DEBUG_FILE="/home/dsyzling/dev/vscodelog"
-
-# # prompt for venv with python
-# setopt PROMPT_SUBST
-
-# show_virtual_env() {
-#   if [[ -n "$VIRTUAL_ENV" && -n "$DIRENV_DIR" ]]; then
-#     echo "($(basename $VIRTUAL_ENV))"
-#   fi
-# }
-
-# to support conda as well as venv.
-# Only use if we're not using direnv
-# show_virtual_env() {
-#   if [[ $(pyenv local 2>/dev/null) == *"conda"* ]]; then
-#      VENV=$CONDA_DEFAULT_ENV
-#   else
-#      VENV=$VIRTUAL_ENV
-#   fi
-#   if [[ -n "$VENV" && -n "$DIRENV_DIR" ]]; then
-#      echo "($(basename $VENV))"
-#   fi
-# }
-# PS1='$(show_virtual_env)'$PS1
 
 # hook direnv into shell
 eval "$(direnv hook zsh)"
