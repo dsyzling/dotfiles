@@ -14,6 +14,10 @@
 ;;
 (require 'org)
 
+;; Use to disable prompting to confirm running code block
+;; Possible security issue - but I use this so much for research papers.
+(setq org-confirm-babel-evaluate nil)
+
 ;; org-mode defaults.
 (add-hook 'org-mode-hook
           '(lambda ()
