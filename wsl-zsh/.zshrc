@@ -82,6 +82,11 @@ export NVM_DIR="$HOME/.nvm"
 # hook direnv into shell
 eval "$(direnv hook zsh)"
 
+# initialise starship prompt
+# install with:
+#  curl -sS https://starship.rs/install.sh | sh
+# eval "$(starship init zsh)"
+
 # Issue with WSL and Ubuntu falling back to using X11 rather than Wayland.
 # Wayland will provide the smoother fonts on hidpi displays
 #   https://github.com/microsoft/wslg/issues/1244
