@@ -87,6 +87,16 @@
 
 ;; revert buffers automatically when underlying files are changed externally
 (global-auto-revert-mode t)
+;; dired mode is a key issue here 
+(setopt global-auto-revert-non-file-buffers t)
+
+;; cursors in inactive windows can be distracting
+(setopt cursor-in-non-selected-windows nil)
+
+;; default buffer is 1024 
+(setopt comint-buffer-maximum-size 8192)
+
+(setopt native-comp-async-report-warnings-errors 'silent)
 
 ;; smart tab behavior - indent or complete
 ;;(setq tab-always-indent 'complete)
