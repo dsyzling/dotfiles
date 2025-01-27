@@ -522,6 +522,9 @@
 ;;
 ;; keys that I want to apply to all of our programming modes
 ;;
+;; lsp symbols
+;; Use C-, to narrow symbols and then c - classes, f - field etc.
+;;
 (define-key lsp-mode-map (kbd "C-M-.")   'consult-lsp-symbols)
 ;; If we have issues with consult-lsp we can use ivy instead - uncomment ivy inclusion above.
 ;; (define-key lsp-mode-map (kbd "C-M-.")   'lsp-ivy-workspace-symbol)
