@@ -127,3 +127,7 @@ gpip3(){
 # opt out of dotnet telemetry being sent to MS
 export DOTNET_CLI_TELEMETRY_OPTOUT=true
 
+# hook direnv into shell
+eval "$(direnv hook zsh)"
+
+. "$HOME/.local/bin/env"
