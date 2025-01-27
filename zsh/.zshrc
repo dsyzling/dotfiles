@@ -130,4 +130,7 @@ export DOTNET_CLI_TELEMETRY_OPTOUT=true
 # hook direnv into shell
 eval "$(direnv hook zsh)"
 
+# starship prompt
+eval "$(starship init zsh)"
+
 . "$HOME/.local/bin/env"
