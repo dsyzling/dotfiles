@@ -463,15 +463,9 @@
 ;;
 (require 'ds-python)
 
+;; If we have issues with lsp and consult we can use ivy.
 ;;
-;; Temporary fix for breaking API change in consult whic hmeans consult-lsp
-;; doesn't work.
-;;   https://github.com/gagbo/consult-lsp/issues/44
-;;
-;; Use Ivy instead for now.
-;;
-(use-package lsp-ivy :ensure t)
-(define-key elpy-mode-map (kbd "C-M-.")   'lsp-ivy-workspace-symbol)
+;; (use-package lsp-ivy :ensure t)
 
 ;; (setq
 ;;  lsp-pylance-langserver-command
@@ -528,10 +522,9 @@
 ;;
 ;; keys that I want to apply to all of our programming modes
 ;;
-;; consult-lsp currently does not work due to breaking API change
-;; Temporarily using ivy instead.
-;; (define-key lsp-mode-map (kbd "C-M-.")   'consult-lsp-symbols)
-(define-key lsp-mode-map (kbd "C-M-.")   'lsp-ivy-workspace-symbol)
+(define-key lsp-mode-map (kbd "C-M-.")   'consult-lsp-symbols)
+;; If we have issues with consult-lsp we can use ivy instead - uncomment ivy inclusion above.
+;; (define-key lsp-mode-map (kbd "C-M-.")   'lsp-ivy-workspace-symbol)
 
 (define-key lsp-mode-map (kbd "C-c C-f") 'consult-projectile-find-file)
 (define-key lsp-mode-map (kbd "C-c C-d") 'lsp-describe-thing-at-point)
