@@ -114,6 +114,11 @@
 (require 'ds-org)
 
 ;;
+;; Research papers with Quarto and Markdown
+;;
+(require 'ds-quarto)
+
+;;
 ;; magit customisation
 ;; Turn on spell checking
 ;;
