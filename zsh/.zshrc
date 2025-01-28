@@ -127,10 +127,10 @@ gpip3(){
 # opt out of dotnet telemetry being sent to MS
 export DOTNET_CLI_TELEMETRY_OPTOUT=true
 
+. "$HOME/.local/bin/env"
+
 # hook direnv into shell
 eval "$(direnv hook zsh)"
 
 # starship prompt
 eval "$(starship init zsh)"
-
-. "$HOME/.local/bin/env"
