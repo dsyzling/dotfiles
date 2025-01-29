@@ -53,18 +53,11 @@
   (when (eq system-type 'windows-nt)
     (setq lsp-scala--server-command "metals-emacs.bat"))
   :bind (:map scala-mode-map
-              ;;("C-c C-f" . helm-projectile-find-file)
-              ("C-c C-f" . counsel-projectile-find-file)
               ("C-c C-t" . bloop-test-only)
-              ;;("C-M-."   . helm-lsp-workspace-symbol)
-              ("C-M-."   . lsp-ivy-workspace-symbol)
               ("C-c C-c" . bloop-compile)
               ("C-c C-z" . ensime-inf-switch)
               ("C-c C-c" . ensime-inf-eval-region)
-              ("C-c C-d" . lsp-describe-thing-at-point)
               ("RET"     . 'scala-mode-newline-comments)
-              ("M-RET"   . 'helm-lsp-code-actions)
-              ("C-c C-r" . lsp-ui-peek-find-references)
               ))
 
 ;; Add metals backend for lsp-mode

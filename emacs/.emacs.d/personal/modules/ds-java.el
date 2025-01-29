@@ -35,14 +35,9 @@
   (add-hook 'java-mode-hook 'lsp)
   (add-hook 'java-mode-hook 'ds-java-editing-defaults)
   :bind (:map java-mode-map
-              ("C-c C-f" . counsel-projectile-find-file)
               ("C-c C-t" . ds-java-run-tests-current-buffer)
-              ("C-M-."   . lsp-ivy-workspace-symbol)
               ;;("C-c C-c" . bloop-compile)
-              ("C-c C-d" . lsp-describe-thing-at-point)
-              ("M-RET"   . 'helm-lsp-code-actions)
               ("RET"     . 'newline-and-indent)
-              ("C-c C-r" . lsp-ui-peek-find-references)
               ))
 
 ;; LSP slowness could be caused by slow JDT server, especially on large JAVA
