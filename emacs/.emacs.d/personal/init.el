@@ -397,6 +397,8 @@
 ;; dap for debugging via lsp servers
 (use-package dap-mode
   :ensure t
+  ;; Our custom dap mode to debug multi-processes with Python.
+  :load-path "~/dev/dap-mode/"
   :defer t
   :config
   ;; Pythn debugger can be debugpy or ptvsd (now deprecated)
