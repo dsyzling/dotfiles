@@ -301,7 +301,7 @@ so that we can import modules from the current project."
 (use-package lsp-pyright
   :ensure t
   :config
-  ;; (setq lsp-clients-python-library-directories '("/usr/" "/home/dsyzling/miniconda3/pkgs"))
+  :custom (lsp-pyright-langserver-command "pyright") ;; pyright or basedpyright
   (setq lsp-pyright-disable-language-services nil
         lsp-pyright-disable-organize-imports nil
         lsp-pyright-auto-import-completions t
@@ -310,7 +310,7 @@ so that we can import modules from the current project."
         lsp-pyright-multi-root nil
         ;; off basic or strict - basic is the default.
         ;; lsp-pyright-typechecking-mode "strict"
-        lsp-pyright-venv-path "/home/dsyzling/miniconda3/envs")
+        )
   ;; Ensure if we're running mypy that generated files do not cause change
   ;; notifications otherwise this leads to recurring diagnostic checks.
   (push "[/\\\\]\\.mypy_cache\\'" lsp-file-watch-ignored-directories)
