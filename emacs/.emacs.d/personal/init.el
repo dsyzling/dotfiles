@@ -152,7 +152,8 @@
   (set-face-attribute 'default
                       nil
                       :font "JetBrainsMono"
-                      :height 105
+                      ;; :height 105
+                      :height 110
                       :weight 'medium)
 
   ;; Use google-chrome-stable as our default browser
@@ -398,7 +399,7 @@
 (use-package dap-mode
   :ensure t
   ;; Our custom dap mode to debug multi-processes with Python.
-  :load-path "~/dev/dap-mode/"
+  ;; :load-path "~/dev/dap-mode/"
   :defer t
   :config
   ;; Pythn debugger can be debugpy or ptvsd (now deprecated)
@@ -525,6 +526,18 @@
 (global-set-key (kbd "C--") 'text-scale-decrease)
 (global-set-key (kbd "C-x j") 'avy-goto-char)
 (global-set-key (kbd "C-c a") 'org-agenda)
+
+;;
+;; We're using projectile with consult to find files in projects
+;; so we will specify a list of directories and suffixes that should
+;; be filtered.
+;;
+;; indexing must be hybrid or native to filter.
+(setq projectile-indexing-method `hybrid)
+;; Java build directory with class files
+;; (add-to-list 'projectile-globally-ignored-directories "*build")
+;; list of file suffixes to ignore - this list doesn't exist by default.
+(setq projectile-globally-ignored-file-suffixes `(".class"))
 
 ;;
 ;; keys that I want to apply to all of our programming modes
