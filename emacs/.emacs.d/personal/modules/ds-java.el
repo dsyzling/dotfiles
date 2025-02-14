@@ -28,15 +28,17 @@
   
   )
 
+;;
+;; use lsp-java-debug-test-method to debug unit tests.
+;;
 (use-package lsp-java
   :ensure t
-  ;;:load-path "~/projects/emacs/lsp-java/"
   :init
   (add-hook 'java-mode-hook 'lsp)
   (add-hook 'java-mode-hook 'ds-java-editing-defaults)
   :bind (:map java-mode-map
-              ("C-c C-t" . ds-java-run-tests-current-buffer)
-              ;;("C-c C-c" . bloop-compile)
+              ;; will run tests for the method selected or class
+              ("C-c C-t" . dap-java-run-test-method)
               ("RET"     . 'newline-and-indent)
               ))
 
@@ -113,6 +115,39 @@
   (interactive)
   (ds-java--exec-main-class "com.dsyzling.app.App" "Darren"))
 
+;;
+;; Run template without debug
+;; Use via dap-debug and select configuration.
+;;
+(dap-register-debug-template "Java Run No Debug"
+                             (list :type "java"
+                                   :request "launch"
+                                   :args ""
+                                   :cwd nil
+                                   :noDebug t
+                                   :stopOnEntry :json-false
+                                   :host "localhost"
+                                   :request "launch"
+                                   :modulePaths (vector)
+                                   :classPaths nil
+                                   :projectName nil
+                                   :mainClass nil))
+
+(defun ds-java-run ()
+  "Run the current main method class without debugging enabled."
+  (interactive)
+  (dap-debug (list :type "java"
+                   :request "launch"
+                   :args ""
+                   :cwd nil
+                   :noDebug t
+                   :stopOnEntry :json-false
+                   :host "localhost"
+                   :request "launch"
+                   :modulePaths (vector)
+                   :classPaths nil
+                   :projectName nil
+                   :mainClass nil)))
 
 
 (provide 'ds-java)
