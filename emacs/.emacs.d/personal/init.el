@@ -125,6 +125,8 @@
 (use-package magit
   :hook ((git-commit-mode . flyspell-mode)))
 
+;; Icons for git status page.
+(setopt magit-format-file-function #'magit-format-file-all-the-icons) 
 
 ;; ;; TODO - remove these prelude definitions.
 ;; ;; Disable undo-tree, slowing down saving large orgmode buffers and
@@ -153,7 +155,7 @@
                       nil
                       :font "JetBrainsMono"
                       ;; :height 105
-                      :height 110
+                      :height 115
                       :weight 'medium)
 
   ;; Use google-chrome-stable as our default browser
@@ -197,24 +199,6 @@
   :config
   (window-numbering-mode))
 
-;; for now let's use the default theme with a different background colour
-;;(set-background-color "#211e1e")
-
-(use-package twilight-theme
-  :ensure t
-  :config
-  (load-theme 'twilight t))
-
-;; make comment italic and standard foreground text less 'bright'
-;; for the twilight theme
-(custom-theme-set-faces
- 'twilight
- '(default ((t (:background "#141414" :foreground "#cacaca"))))
- '(font-lock-comment-face ((t (:italic t :foreground "#5F5A60"))))
- '(font-lock-warning-face ((t (:background "#141414" :foreground "red"))))
- )
-(set-background-color "#1E1E1E")
-
 
 ;; erc customisations - remove join, leave quit messages
 (setq erc-hide-list '("JOIN" "PART" "QUIT"))
@@ -240,16 +224,6 @@
 ;; share amongst machines
 (setq gnus-init-file (expand-file-name "gnus/.gnus.el" sync-home))
 (setq gnus-startup-file (expand-file-name "gnus/.newsrc" sync-home))
-
-;; Company colour theme customisation
-(require 'color)
-(let ((bg (face-attribute 'default :background)))
-  (custom-set-faces
-   `(company-tooltip ((t (:inherit default :background ,(color-lighten-name bg 2)))))
-   `(company-scrollbar-bg ((t (:background ,(color-lighten-name bg 10)))))
-   `(company-scrollbar-fg ((t (:background ,(color-lighten-name bg 5)))))
-   `(company-tooltip-selection ((t (:background ,(color-lighten-name bg 10)))))
-   `(company-tooltip-common ((t (:inherit font-lock-constant-face))))))
 
 
 ;; Mood-lone mode - sort out by mode line
@@ -331,6 +305,9 @@
         gc-cons-threshold 100000000
         gc-cons-percentage 0.5
         read-process-output-max (* 1024 1024) ;; 1mb
+        
+        ;; enable lsp-copilot 
+        ;; lsp-copilot-enabled t
         )
   ;; the modeline may require icons from lsp-treemacs and will fallback to
   ;; all-the-icons.
@@ -448,6 +425,11 @@
 ;;
 (use-package yasnippet-snippets
   :ensure t)
+
+;;
+;; Themes
+;; 
+(require 'ds-theme)
 
 ;;
 ;; Clojure/Clojurescript development configuration

@@ -14,22 +14,26 @@
 ;;
 ;; Company mode customisation.
 ;;
+(require 'python)
 (use-package company
   :ensure t
   :config
   ;; Reduce company idle delay for completion
-  (setq company-idle-delay 0.2
-        company-minimum-prefix-length 2
+  (setq company-idle-delay 0
+        company-tooltip-idle-delay 0
+        ;; company-minimum-prefix-length 2
         company-tooltip-align-annotations t
         company-tooltip-minimum-width 50
-        company-icon-size 20)
+        company-icon-size 20
+        )
   :init
   (global-company-mode 1)
   ;; In case we want to override completion style -
   ;; Default is basic partial-completion
   ;;(setq completion-styles '(partial-completion))
   ;;(add-to-list 'company-backends '(company-capf :with company-yasnippet))
-
+  (setq company-backends '(company-capf))
+  
   ;; override idle delay for certain modes, otherwise it can be annoying
   ;; when typing.
   :hook
@@ -41,15 +45,10 @@
   :ensure t
   :hook (company-mode . company-box-mode))
 
-;; Company colour theme customisation
-(require 'color)
-(let ((bg (face-attribute 'default :background)))
-  (custom-set-faces
-   `(company-tooltip ((t (:inherit default :background ,(color-lighten-name bg 2)))))
-   `(company-scrollbar-bg ((t (:background ,(color-lighten-name bg 10)))))
-   `(company-scrollbar-fg ((t (:background ,(color-lighten-name bg 5)))))
-   `(company-tooltip-selection ((t (:background ,(color-lighten-name bg 10)))))
-   `(company-tooltip-common ((t (:inherit font-lock-constant-face))))))
+;;
+;; Note any company colour customisations required have been moved
+;; to ds-theme.el
+;;
 
 ;;
 ;; company-quickhelp is not displaying the popup correctly on mac osx or
