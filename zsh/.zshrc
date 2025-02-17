@@ -132,5 +132,9 @@ export DOTNET_CLI_TELEMETRY_OPTOUT=true
 # hook direnv into shell
 eval "$(direnv hook zsh)"
 
-# starship prompt
-eval "$(starship init zsh)"
+# Use starship prompt in non 'dumb' terminals - default to zsh for Emacs shell.
+if ! [[ $TERM == "dumb" ]] eval "$(starship init zsh)";
+
+# >>> coursier install directory >>>
+export PATH="$PATH:/home/dsyzling/.local/share/coursier/bin"
+# <<< coursier install directory <<<
