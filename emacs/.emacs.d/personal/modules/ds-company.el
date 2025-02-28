@@ -24,6 +24,7 @@
         ;; company-minimum-prefix-length 2
         company-tooltip-align-annotations t
         company-tooltip-minimum-width 50
+        company-require-match nil
         company-icon-size 20
         )
   :init
