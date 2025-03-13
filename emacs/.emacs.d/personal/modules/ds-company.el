@@ -21,7 +21,7 @@
   ;; Reduce company idle delay for completion
   (setq company-idle-delay 0
         company-tooltip-idle-delay 0
-        ;; company-minimum-prefix-length 2
+        company-minimum-prefix-length 2
         company-tooltip-align-annotations t
         company-tooltip-minimum-width 50
         company-require-match nil
@@ -42,9 +42,16 @@
                 (set (make-local-variable 'company-idle-delay) 0.4)))
   )
 
-(use-package company-box
+;; (use-package company-box
+;;   :ensure t
+;;   :hook (company-mode . company-box-mode))
+
+(use-package company-quickhelp
   :ensure t
-  :hook (company-mode . company-box-mode))
+  :after company
+  :config
+  (setq company-quickhelp-idle-delay 0.1)
+  (company-quickhelp-mode 1))
 
 ;;
 ;; Note any company colour customisations required have been moved
