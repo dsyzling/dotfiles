@@ -99,7 +99,6 @@
           (org-agenda-current-time-string "ᐊ┈┈┈┈┈┈┈ Now")
           ;; remove the Scheduled text in our agenda.
           (org-agenda-scheduled-leaders '("" ""))
-          (org-agenda-deadline-leaders '("Deadline: " "Deadline: "))
           (org-agenda-time-grid (quote ((today require-timed remove-match) (0900 2100) "      " "┈┈┈┈┈┈┈┈┈┈┈┈┈")))
           ))
         ("w" "Waiting Tasks"  ((tags "WAITING")))
