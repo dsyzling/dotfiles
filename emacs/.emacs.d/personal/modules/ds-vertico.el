@@ -38,6 +38,11 @@
   (vertico-mode))
 
 ;;
+;; Allow us to remove path in completion area by typing ~/
+;;
+(add-hook 'rfn-eshadow-update-overlay-hook #'vertico-directory-tidy)
+
+;;
 ;; Allow backspace/delete key to remove entire directory when using vertico
 ;; to complete filepaths.
 ;;
