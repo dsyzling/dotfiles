@@ -160,7 +160,9 @@
 
   ;; Use google-chrome-stable as our default browser
   (setq browse-url-browser-function 'browse-url-generic
-        browse-url-generic-program "google-chrome-stable")
+        browse-url-generic-program "firefox"
+        ;; browse-url-generic-program "google-chrome-stable"
+        )
 
   ;; When using Emacs & WSL on my work machine update browser executable.
   (when (string= "DARRENS1" (system-name))
