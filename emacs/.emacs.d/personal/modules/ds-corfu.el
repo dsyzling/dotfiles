@@ -6,6 +6,8 @@
 ;;   https://github.com/minad/corfu
 ;;   https://kristofferbalintona.me/posts/202202270056/;
 ;;
+;; Consider Prescient in future:
+;;  https://kristofferbalintona.me/posts/202504050923/
 
 ;;; Commentary:
 
@@ -13,71 +15,103 @@
 
 ;;
 ;; Enable corfu
+;;
+;; A basic corfu config
 (use-package corfu
+  ;; Optional customizations
   :custom
-  ;; (:keymaps 'corfu-map
-  ;;  :states 'insert
-  ;;  "C-n" #'corfu-next
-  ;;  "C-p" #'corfu-previous
-  ;;  "<escape>" #'corfu-quit
-  ;;  "<return>" #'corfu-insert
-  ;;  "M-d" #'corfu-show-documentation
-  ;;  "M-l" #'corfu-show-location)
+  (corfu-auto-delay 0)
+  ;; (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
+  ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
+  ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
+  ;; (corfu-preview-current nil)    ;; Disable current candidate preview
+  ;; (corfu-preselect 'prompt)      ;; Preselect the prompt
+  ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
 
-  (corfu-auto nil) ; Only use `corfu' when calling `completion-at-point' or
-                                        ; `indent-for-tab-command'
-  (corfu-auto-prefix 2)
-  (corfu-auto-delay 0.25)
+  ;; Enable Corfu only for certain modes. See also `global-corfu-modes'.
+  ;; :hook ((prog-mode . corfu-mode)
+  ;;        (shell-mode . corfu-mode)
+  ;;        (eshell-mode . corfu-mode))
 
-  (corfu-min-width 80)
-  (corfu-max-width corfu-min-width)     ; Always have the same width
-  (corfu-count 14)
-  (corfu-scroll-margin 4)
-  (corfu-cycle nil)
+  :init
 
-  ;; `nil' means to ignore `corfu-separator' behavior, that is, use the older
-  ;; `corfu-quit-at-boundary' = nil behavior. Set this to separator if using
-  ;; `corfu-auto' = `t' workflow (in that case, make sure you also set up
-  ;; `corfu-separator' and a keybind for `corfu-insert-separator', which my
-  ;; configuration already has pre-prepared). Necessary for manual corfu usage with
-  ;; orderless, otherwise first component is ignored, unless `corfu-separator'
-  ;; is inserted.
-  (corfu-quit-at-boundary nil)
-  (corfu-preselect-first t)             ; Preselect first candidate?
+  ;; Recommended: Enable Corfu globally.  Recommended since many modes provide
+  ;; Capfs and Dabbrev can be used globally (M-/).  See also the customization
+  ;; variable `global-corfu-modes' to exclude certain modes.
+  (global-corfu-mode)
 
-  ;; Other
-  ;; NOTE 2022-02-05: In my actual configuration, I have this variable set to nil
-  ;; since I use `corfu-doc', whose configuration comes later. But if you don't
-  ;; use `corfu-doc', this might be helpful to you.
-  (corfu-echo-documentation t)      ; Show documentation in echo area?
+  ;; Enable optional extension modes:
+  ;; (corfu-history-mode)
+  ;; (corfu-popupinfo-mode)
+  )
 
-  ;; Works with `indent-for-tab-command'. Make sure tab doesn't indent when you
-  ;; want to perform completion
-  (tab-always-indent 'complete)
-  (completion-cycle-threshold nil) ; Always show all candidates in popup menu
 
-  (lsp-completion-provider :none) ; Use corfu instead the default for lsp completions
+
+
+;; (use-package corfu
+;;   :custom
+;;   ;; (:keymaps 'corfu-map
+;;   ;;  :states 'insert
+;;   ;;  "C-n" #'corfu-next
+;;   ;;  "C-p" #'corfu-previous
+;;   ;;  "<escape>" #'corfu-quit
+;;   ;;  "<return>" #'corfu-insert
+;;   ;;  "M-d" #'corfu-show-documentation
+;;   ;;  "M-l" #'corfu-show-location)
+
+;;   (corfu-auto nil) ; Only use `corfu' when calling `completion-at-point' or
+;;                                         ; `indent-for-tab-command'
+;;   (corfu-auto-prefix 2)
+;;   (corfu-auto-delay 0.25)
+
+;;   (corfu-min-width 80)
+;;   (corfu-max-width corfu-min-width)     ; Always have the same width
+;;   (corfu-count 14)
+;;   (corfu-scroll-margin 4)
+;;   (corfu-cycle nil)
+
+;;   ;; `nil' means to ignore `corfu-separator' behavior, that is, use the older
+;;   ;; `corfu-quit-at-boundary' = nil behavior. Set this to separator if using
+;;   ;; `corfu-auto' = `t' workflow (in that case, make sure you also set up
+;;   ;; `corfu-separator' and a keybind for `corfu-insert-separator', which my
+;;   ;; configuration already has pre-prepared). Necessary for manual corfu usage with
+;;   ;; orderless, otherwise first component is ignored, unless `corfu-separator'
+;;   ;; is inserted.
+;;   (corfu-quit-at-boundary nil)
+;;   (corfu-preselect-first t)             ; Preselect first candidate?
+
+;;   ;; Other
+;;   ;; NOTE 2022-02-05: In my actual configuration, I have this variable set to nil
+;;   ;; since I use `corfu-doc', whose configuration comes later. But if you don't
+;;   ;; use `corfu-doc', this might be helpful to you.
+;;   (corfu-echo-documentation t)      ; Show documentation in echo area?
+
+;;   ;; Works with `indent-for-tab-command'. Make sure tab doesn't indent when you
+;;   ;; want to perform completion
+;;   (tab-always-indent 'complete)
+;;   (completion-cycle-threshold nil) ; Always show all candidates in popup menu
+
+;;   (lsp-completion-provider :none) ; Use corfu instead the default for lsp completions
   
-  ;; :bind (:map corfu-map
-  ;;             ("C-n" . corfu-next)
-  ;;             ("C-p" . corfu-previous)
-  ;;             ("<escape>" . corfu-quit)
-  ;;             ("<return>" . corfu-insert)
-  ;;             ("M-d" . corfu-show-documentation)
-  ;;             ("M-l" . corfu-show-location))
+;;   ;; :bind (:map corfu-map
+;;   ;;             ("C-n" . corfu-next)
+;;   ;;             ("C-p" . corfu-previous)
+;;   ;;             ("<escape>" . corfu-quit)
+;;   ;;             ("<return>" . corfu-insert)
+;;   ;;             ("M-d" . corfu-show-documentation)
+;;   ;;             ("M-l" . corfu-show-location))
   
-  ;; :hook (lsp-completion-mode . kb/corfu-setup-lsp) ; Use corfu for lsp completion
+;;   ;; :hook (lsp-completion-mode . kb/corfu-setup-lsp) ; Use corfu for lsp completion
     
-  :config
-  ;; Setup lsp to use corfu for lsp completion
-  (defun kb/corfu-setup-lsp ()
-    "Use orderless completion style with lsp-capf instead of the
-  default lsp-passthrough."
-    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-          '(orderless)))
+;;   :config
+;;   ;; Setup lsp to use corfu for lsp completion
+;;   (defun kb/corfu-setup-lsp ()
+;;     "Use orderless completion style with lsp-capf instead of the
+;;   default lsp-passthrough."
+;;     (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+;;           '(orderless)))
   
-  (global-corfu-mode))
-
+;;   (global-corfu-mode))
 
 (use-package kind-icon
   :ensure t
