@@ -128,6 +128,15 @@
 ;; Icons for git status page.
 (setopt magit-format-file-function #'magit-format-file-all-the-icons) 
 
+;;
+;; Forge for working with PRs etc. on Github/Gitlab
+;;
+;; Setup for github requires access tokens
+;;   https://magit.vc/manual/forge/Setup-for-Githubcom.html
+(use-package forge
+  :after magit)
+
+
 ;; ;; TODO - remove these prelude definitions.
 ;; ;; Disable undo-tree, slowing down saving large orgmode buffers and
 ;; ;; I've never really used it.
