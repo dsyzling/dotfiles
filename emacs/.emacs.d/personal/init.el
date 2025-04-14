@@ -478,6 +478,11 @@
 ;;
 (require 'ds-R)
 
+;;
+;; Emacs based LLMs
+;;
+(require 'ds-llm)
+
 ;; pyls appears to have some terrible performance problems and issues
 ;; - goto definition not working reliably, so for now use the Microsoft
 ;; server by default.
