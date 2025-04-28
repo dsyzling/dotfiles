@@ -317,8 +317,8 @@
         gc-cons-percentage 0.5
         read-process-output-max (* 1024 1024) ;; 1mb
         
-        ;; enable lsp-copilot 
-        ;; lsp-copilot-enabled t
+        ;; lsp-copilot - explicitly disable for now
+        lsp-copilot-enabled nil
         )
   ;; the modeline may require icons from lsp-treemacs and will fallback to
   ;; all-the-icons.
