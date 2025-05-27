@@ -456,6 +456,12 @@ Lists the object's non-method fields and their respective current values."
 (define-key elpy-mode-map (kbd "C-c C-c") 'ds-python-elpy-shell-send-region-or-buffer-and-step)
 (define-key elpy-mode-map (kbd "C-c C-o") 'ds/print-python-object-fields-in-repl)
 
+;; remove C-c C-e from elpy mode map - python shell send statement etc.
+(define-key elpy-mode-map (kbd "C-c C-e") nil)
+;; remove run-python - we use C-c C-z to open python shell.
+(define-key python-mode-map (kbd "C-c C-p") nil)
+(define-key elpy-mode-map (kbd "C-c C-p") nil)
+
 ;; Also note the following keys to eval python for repl driven development
 ;;
 ;; | C-c C-z   | open or go to oppen repl                                             |

@@ -51,5 +51,27 @@
 ;;
 (use-package copilot-chat)
 
+;;
+;; chatgpt-shell
+;; See the following post for ways of using this mode:
+;;   https://lmno.lol/alvaro/chatgpt-shell-goes-multi-model
+;; highlight function - chatgpt-shell-prompt-compose
+;; enter a prompt and C-c C-c
+;;
+(use-package chatgpt-shell
+  :ensure t
+  :custom
+  ((chatgpt-shell-google-key
+    (lambda ()
+      (get-llm-api-key "gemini.google.com")))
+   
+   )
+  ;; key bindings - prompt compose - then C-c C-c to send prompt 
+  :bind (("C-c C-p" . chatgpt-shell-prompt-compose))
+  )
+
+;; set default model
+(setq chatgpt-shell-model-version "gemini-2.0-flash")
+
 
 (provide 'ds-llm)
