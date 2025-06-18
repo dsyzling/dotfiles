@@ -600,3 +600,19 @@
   (setq interprogram-cut-function 'wl-copy)
   (setq interprogram-paste-function 'wl-paste))
 
+;;
+;; Smarter keyboard quit from
+;;  https://emacsredux.com/blog/2025/06/01/let-s-make-keyboard-quit-smarter/
+;;
+(defun er-keyboard-quit ()
+  "Smater version of the built-in `keyboard-quit'.
+
+The generic `keyboard-quit' does not do the expected thing when
+the minibuffer is open.  Whereas we want it to close the
+minibuffer, even without explicitly focusing it."
+  (interactive)
+  (if (> (minibuffer-depth) 0)
+      (abort-recursive-edit)
+    (keyboard-quit)))
+    
+(global-set-key [remap keyboard-quit] #'er-keyboard-quit)
