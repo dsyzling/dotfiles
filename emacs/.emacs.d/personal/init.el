@@ -378,32 +378,101 @@
 (when (not (window-system))
   (setq lsp-headerline-arrow "=>"))
 
+;; Justfile mode
+(use-package just-mode
+  :ensure t)
+  
+;; justl to run just recipes
+(use-package justl
+  :ensure t)
+
 
 (use-package markdown-mode
   :ensure t)
 
+;;
+;; Use dape for debugging rather than dap-debug.
+;; dap-mode has issues dealing with hierarchical debugging in Python/debugpy
+;;
+(use-package dape
+  :preface
+  ;; By default dape shares the same keybinding prefix as `gud'
+  ;; If you do not want to use any prefix, set it to nil.
+  ;; (setq dape-key-prefix "\C-x\C-a")
+
+  ;; :hook
+  ;; Save breakpoints on quit
+  ;; (kill-emacs . dape-breakpoint-save)
+  ;; Load breakpoints on startup
+  ;; (after-init . dape-breakpoint-load)
+
+  :custom
+  ;; Turn on global bindings for setting breakpoints with mouse
+                                        ;(dape-breakpoint-global-mode +1)
+
+  ;; Info buffers to the right
+  (dape-buffer-window-arrangement 'right)
+  ;; Info buffers like gud (gdb-mi)
+  ;; (dape-buffer-window-arrangement 'gud)
+  ;; (dape-info-hide-mode-line nil)
+
+  ;; Projectile users
+  (dape-cwd-function 'projectile-project-root)
+
+  :config
+  ;; Pulse source line (performance hit)
+  ;; (add-hook 'dape-display-source-hook 'pulse-momentary-highlight-one-line)
+
+  ;; Save buffers on startup, useful for interpreted languages
+  ;; (add-hook 'dape-start-hook (lambda () (save-some-buffers t t)))
+
+  ;; Kill compile buffer on build success
+  ;; (add-hook 'dape-compile-hook 'kill-buffer)
+  )
+
+;; For a more ergonomic Emacs and `dape' experience
+;; (use-package repeat
+;;   :custom
+;;   (repeat-mode +1))
+
+;; Just matching my historic keys for debugging.
+(with-eval-after-load 'dape
+  (define-key global-map (kbd "<f10>") 'dape-next)
+  (define-key global-map (kbd "<f8>") 'dape-next)
+  (define-key global-map (kbd "<f7>") 'dape-step-in)
+  (define-key global-map (kbd "<f5>") 'dape-continue)
+  (define-key global-map (kbd "<f9>") 'dape-breakpoint-toggle)
+  (define-key global-map (kbd "<f6>") 'dape-kill)
+  )
 
 ;; dap for debugging via lsp servers
-(use-package dap-mode
-  :ensure t
-  ;; Our custom dap mode to debug multi-processes with Python.
-  ;; :load-path "~/dev/dap-mode/"
-  :defer t
-  :config
-  ;; Pythn debugger can be debugpy or ptvsd (now deprecated)
-  (setq dap-python-debugger 'debugpy)
-  ;; Don't show breakpoints on initial display for debugger.
-  (setq dap-auto-configure-features '(sessions locals expressions controls tooltip repl))
-  (dap-auto-configure-mode)
-   ;; Position dap-ui-repl at the bottom of the screen. These are defaults from dap-ui.
-  (setq dap-ui-buffer-configurations
-        `((,dap-ui--locals-buffer . ((side . right) (slot . 1) (window-width . 0.20)))
-          (,dap-ui--expressions-buffer . ((side . right) (slot . 2) (window-width . 0.20)))
-          (,dap-ui--sessions-buffer . ((side . right) (slot . 3) (window-width . 0.20)))
-          (,dap-ui--breakpoints-buffer . ((side . left) (slot . 2) (window-width . ,treemacs-width)))
-          (,dap-ui--debug-window-buffer . ((side . bottom) (slot . 3) (window-width . 0.20)))
-          (,dap-ui--repl-buffer . ((side . bottom) (slot . 1) (window-height . 0.20))))))
+;; (use-package dap-mode
+;;   :ensure t
+;;   ;; Our custom dap mode to debug multi-processes with Python.
+;;   ;; :load-path "~/dev/dap-mode/"
+;;   :defer t
+;;   :config
+;;   ;; Pythn debugger can be debugpy or ptvsd (now deprecated)
+;;   (setq dap-python-debugger 'debugpy)
+;;   ;; Don't show breakpoints on initial display for debugger.
+;;   (setq dap-auto-configure-features '(sessions locals expressions controls tooltip repl))
+;;   (dap-auto-configure-mode)
+;;    ;; Position dap-ui-repl at the bottom of the screen. These are defaults from dap-ui.
+;;   (setq dap-ui-buffer-configurations
+;;         `((,dap-ui--locals-buffer . ((side . right) (slot . 1) (window-width . 0.20)))
+;;           (,dap-ui--expressions-buffer . ((side . right) (slot . 2) (window-width . 0.20)))
+;;           (,dap-ui--sessions-buffer . ((side . right) (slot . 3) (window-width . 0.20)))
+;;           (,dap-ui--breakpoints-buffer . ((side . left) (slot . 2) (window-width . ,treemacs-width)))
+;;           (,dap-ui--debug-window-buffer . ((side . bottom) (slot . 3) (window-width . 0.20)))
+;;           (,dap-ui--repl-buffer . ((side . bottom) (slot . 1) (window-height . 0.20))))))
 
+;; define a set of basic keys to allow us simple debug navigation.
+;; (with-eval-after-load 'dap-mode
+;;   (define-key dap-mode-map (kbd "<f8>") 'dap-next)
+;;   (define-key dap-mode-map (kbd "<f7>") 'dap-step-in)
+;;   (define-key dap-mode-map (kbd "<f5>") 'dap-continue)
+;;   (define-key dap-mode-map (kbd "<f9>") 'dap-breakpoint-toggle)
+;;   (define-key dap-mode-map (kbd "<f6>") 'dap-disconnect))
 
 ;; TODO - temporarily removed dap-hydra - finding it difficult to
 ;; use this in conjunction with the dap-ui-repl - seems to want
@@ -555,13 +624,6 @@
 (define-key lsp-mode-map (kbd "M-RET")   'lsp-execute-code-action)
 (define-key lsp-mode-map (kbd "C-c C-r") 'lsp-ui-peek-find-references)
 
-;; define a set of basic keys to allow us simple debug navigation.
-(with-eval-after-load 'dap-mode
-  (define-key dap-mode-map (kbd "<f8>") 'dap-next)
-  (define-key dap-mode-map (kbd "<f7>") 'dap-step-in)
-  (define-key dap-mode-map (kbd "<f5>") 'dap-continue)
-  (define-key dap-mode-map (kbd "<f9>") 'dap-breakpoint-toggle)
-  (define-key dap-mode-map (kbd "<f6>") 'dap-disconnect))
 
 ;; Use helm for buffer switching
 ;; (global-set-key (kbd "C-x b") 'helm-mini)
