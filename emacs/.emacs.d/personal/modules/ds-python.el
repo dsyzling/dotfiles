@@ -22,6 +22,9 @@
 ;; use Ruff for linting within emacs - use the lsp-ruff server.
 (require 'lsp-ruff)
 
+;; we add our own dape configs for python/pytest
+(require 'dape)
+
 ;; (setq-default lsp-ruff-show-notifications "always")
 
 
@@ -230,6 +233,54 @@ so that we can import modules from the current project."
                (window-width . 0.5)
                (window-height . 0.25)
                (reusable-frames)))
+
+;;
+;; dape custom configs for pytest nearest test
+;; If the cursor is within a function we run pytest for that function
+;; under the debugger. Otherwise if the cursor is outside of a function
+;; we pytest the entire file in the buffer and run this under the debugger.
+;;
+(defun ds/pytest--nearest-test ()
+  (->> (lsp--get-document-symbols)
+       (lsp--symbols->document-symbols-hierarchy)
+       (mapcar #'dap-python--parse-lsp-symbol)
+       (dap-python--symbols-before-point (dap-python--cursor-position))
+       dap-python--nearest-test))
+
+(defun ds/dape--pytest-nearest-test-args ()
+  "Return a vector of pytest arguments for Dape.
+If a nearest test is found via `ds/pytest--nearest-test', return:
+  [BUFFER-NAME \"-k\" TEST-NAME]
+Otherwise, return:
+  [BUFFER-NAME].
+
+If the test name begins with \"::\", remove that prefix first."
+  (let* ((nearest (ds/pytest--nearest-test))
+         (buffer (dape-buffer-default)))
+    (if nearest
+        (let* ((test-name (format "%s" nearest))
+               (cleaned (if (string-prefix-p "::" test-name)
+                            (substring test-name 2)
+                          test-name)))
+          (vector buffer "-k" cleaned))
+      (vector buffer))))
+
+(add-to-list 'dape-configs
+	         `(pytest
+	           modes (python-mode python-ts-mode python-base-mode)
+	           command "python"
+	           command-args ["-m" "debugpy.adapter" "--host" "0.0.0.0" "--port" :autoport]
+	           port :autoport
+	           :type "python"
+	           :request "launch"
+               :module "pytest"
+	           :args ds/dape--pytest-nearest-test-args
+	           :console "integratedTerminal"
+	           :showReturnValue t
+	           :justMyCode nil
+	           :jinja nil
+	           :cwd dape-cwd-fn))
+
 
 ;; (with-eval-after-load 'lsp-mode
 ;;   (setq display-buffer-alist 
