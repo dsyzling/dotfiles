@@ -281,6 +281,24 @@ If the test name begins with \"::\", remove that prefix first."
 	           :jinja nil
 	           :cwd dape-cwd-fn))
 
+(defun ds/dape--pp-symbol ()
+  "Send symbol in editor window to repl and use print(symbol). 
+By default dape repl is printing all details of python objects -
+we just want a pretty printed version. In future may replace 
+this with pprint pp."
+  (interactive)
+  (let* ((thing (thing-at-point 'symbol t))
+         (symbol-info (lsp--text-document-position-params))
+         (response (lsp-request "textDocument/documentSymbol" symbol-info))
+         (conn (dape--live-connection 'last t)))
+    (if thing
+        (dape-evaluate-expression conn (format "print(%s)" thing))
+      (message "No symbol at point"))))
+
+;; Bind F12 to print symbol.
+(define-key global-map (kbd "<f12>") 'ds/dape--pp-symbol)
+;; Add to dape global map for discovery.
+(bind-key "P" 'ds/dape--pp-symbol dape-global-map)
 
 ;; (with-eval-after-load 'lsp-mode
 ;;   (setq display-buffer-alist 
