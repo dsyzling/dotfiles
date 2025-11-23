@@ -265,6 +265,10 @@ If the test name begins with \"::\", remove that prefix first."
           (vector buffer "-k" cleaned))
       (vector buffer))))
 
+;;
+;; dape configs for pytest and attaching to remote process waiting
+;; for debugger.
+;;
 (add-to-list 'dape-configs
 	         `(pytest
 	           modes (python-mode python-ts-mode python-base-mode)
@@ -280,6 +284,12 @@ If the test name begins with \"::\", remove that prefix first."
 	           :justMyCode nil
 	           :jinja nil
 	           :cwd dape-cwd-fn))
+(add-to-list 'dape-configs
+	         `(attach-python
+	           modes (python-mode python-ts-mode python-base-mode)
+               host "localhost"
+	           port 5678
+	      	   :request "attach"))
 
 (defun ds/dape--pp-symbol ()
   "Send symbol in editor window to repl and use print(symbol). 
