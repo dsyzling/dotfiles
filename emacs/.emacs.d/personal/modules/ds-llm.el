@@ -73,6 +73,22 @@
 (use-package copilot-chat)
 
 ;;
+;; copilot mode - manage separately - rather than integrated with lsp-mode
+;; Requires Node >= 20.0
+;; use nvm and nvm install --lts
+;; M-x copilot-install-server
+;; M-x copilot-login
+;;
+;; (use-package copilot
+;;   :vc (:url "https://github.com/copilot-emacs/copilot.el"
+;;             :rev :newest
+;;             :branch "main"))
+;; (add-to-list 'copilot-major-mode-alist '("python" . "python"))
+;; (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
+;; (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
+;; (define-key global-map (kbd "C-c p") 'copilot-complete)
+
+;;
 ;; chatgpt-shell
 ;; See the following post for ways of using this mode:
 ;;   https://lmno.lol/alvaro/chatgpt-shell-goes-multi-model
