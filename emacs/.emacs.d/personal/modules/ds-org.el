@@ -13,6 +13,7 @@
 ;; org-mode customisation.
 ;;
 (require 'org)
+(require 'all-the-icons)
 
 ;; Use to disable prompting to confirm running code block
 ;; Possible security issue - but I use this so much for research papers.
@@ -464,6 +465,109 @@ Otherwise delegate to the default org-add-note."
    (latex biblatex)                                       ; For pdf
    (odt . (csl "chicago-fullnote-bibliography.csl"))      ; Footnote reliant
    (t . (csl "chicago-fullnote-bibliography.csl"))))      ; Fallback
+
+;;
+;; Citations via completing read options.
+;; C-c b to prompt for citations
+;; add zotero export to ~/bib/references.bib
+;;
+(use-package citar
+  :no-require
+  :custom
+  (org-cite-global-bibliography '("~/bib/references.bib"))
+  (org-cite-insert-processor 'citar)
+  (org-cite-follow-processor 'citar)
+  (org-cite-activate-processor 'citar)
+  (citar-bibliography org-cite-global-bibliography)
+  ;; optional: org-cite-insert is also bound to C-c C-x C-@
+  :bind
+  (:map org-mode-map :package org ("C-c b" . #'org-cite-insert)))
+
+(setq citar-templates
+      '((main . "${author editor:30%sn}     ${date year issued:4}     ${title:48}")
+        (suffix . "          ${=key= id:15}    ${=type=:12}    ${tags keywords:*}")
+        (preview . "${author editor:%etal} (${year issued date}) ${title}, ${journal journaltitle publisher container-title collection-title}.\n")
+        (note . "Notes on ${author editor:%etal}, ${title}")))
+
+;;
+;; Indicators using all-the-icons
+;;
+(defvar citar-indicator-files-icons
+  (citar-indicator-create
+   :symbol (all-the-icons-faicon
+            "file-o"
+            :face 'all-the-icons-green
+            :v-adjust -0.1)
+   :function #'citar-has-files
+   :padding "  " ; need this because the default padding is too low for these icons
+   :tag "has:files"))
+
+(defvar citar-indicator-links-icons
+  (citar-indicator-create
+   :symbol (all-the-icons-octicon
+            "link"
+            :face 'all-the-icons-orange
+            :v-adjust 0.01)
+   :function #'citar-has-links
+   :padding "  "
+   :tag "has:links"))
+
+(defvar citar-indicator-notes-icons
+  (citar-indicator-create
+   :symbol (all-the-icons-material
+            "speaker_notes"
+            :face 'all-the-icons-blue
+            :v-adjust -0.3)
+   :function #'citar-has-notes
+   :padding "  "
+   :tag "has:notes"))
+
+(defvar citar-indicator-cited-icons
+  (citar-indicator-create
+   :symbol (all-the-icons-faicon
+            "circle-o"
+            :face 'all-the-icon-green)
+   :function #'citar-is-cited
+   :padding "  "
+   :tag "is:cited"))
+
+;;
+;; if we want to use nerd icons with citations for indicators - we can use the following:
+;;
+;; (defvar citar-indicator-notes-icons
+;;   (citar-indicator-create
+;;    :symbol (nerd-icons-mdicon
+;;             "nf-md-notebook"
+;;             :face 'nerd-icons-blue
+;;             :v-adjust -0.3)
+;;    :function #'citar-has-notes
+;;    :padding "  "
+;;    :tag "has:notes"))
+
+;; (defvar citar-indicator-links-icons
+;;   (citar-indicator-create
+;;    :symbol (nerd-icons-octicon
+;;             "nf-oct-link"
+;;             :face 'nerd-icons-orange
+;;             :v-adjust -0.1)
+;;    :function #'citar-has-links
+;;    :padding "  "
+;;    :tag "has:links"))
+
+;; (defvar citar-indicator-files-icons
+;;   (citar-indicator-create
+;;    :symbol (nerd-icons-faicon
+;;             "nf-fa-file"
+;;             :face 'nerd-icons-green
+;;             :v-adjust -0.1)
+;;    :function #'citar-has-files
+;;    :padding "  "
+;;    :tag "has:files"))
+
+(setq citar-indicators
+  (list citar-indicator-files-icons
+        citar-indicator-notes-icons
+        citar-indicator-links-icons))
 
 ;; not sure where zotero styles are but you can download
 ;; styles from the following repos
