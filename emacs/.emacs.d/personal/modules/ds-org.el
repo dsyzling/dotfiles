@@ -252,12 +252,13 @@
 
 
 ;; Note org-gcal-client-id and org-gcal-client-secret defined within ds-secrets.el
-(use-package org-gcal
-  :after org
-  :config
-  (setq org-gcal-file-alist '(("dsyzling@gmail.com" . "~/Sync/todo/gcal.org"))
-        org-gcal-auto-archive nil)
-  :ensure t)
+;; Currently generating an error - wrong number of arguments org-gcal/:catch
+;; (use-package org-gcal
+;;   :after org
+;;   :config
+;;   (setq org-gcal-file-alist '(("dsyzling@gmail.com" . "~/Sync/todo/gcal.org"))
+;;         org-gcal-auto-archive nil)
+;;   :ensure t)
 
 (defun ds-org-agenda-redo-with-gcal-refresh ()
   "Refresh org-agenda fully - fetch google calendar events and then refresh agenda."
