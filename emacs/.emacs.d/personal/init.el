@@ -390,6 +390,10 @@
 (use-package markdown-mode
   :ensure t)
 
+;; generate markdown table of contents
+(use-package markdown-toc
+  :ensure t)
+
 ;;
 ;; Use dape for debugging rather than dap-debug.
 ;; dap-mode has issues dealing with hierarchical debugging in Python/debugpy
