@@ -25,6 +25,8 @@
   :config
   ;; or 'latte, 'macchiato, or 'mocha
   (setq catppuccin-flavor 'mocha)
+  (setq catppuccin-flavor 'mocha)
+  (setq catppuccin-italic-comments t)
   (load-theme 'catppuccin t)
   (custom-theme-set-faces
    'catppuccin
