@@ -390,6 +390,9 @@
 (use-package markdown-mode
   :ensure t)
 
+(use-package markdown-indent-mode
+  :hook (markdown-mode . markdown-indent-mode))
+
 ;; generate markdown table of contents
 (use-package markdown-toc
   :ensure t)
