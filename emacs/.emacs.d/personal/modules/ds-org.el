@@ -31,6 +31,10 @@
              ;; in this mode can be annoying.
              (company-mode 0)))
 
+;; Do not use org-lint with flycheck to check our org files
+;; this is causing a serious performance hit. 
+(setq-default flycheck-disabled-checkers '(org-lint))
+
 ;; org files will use utf-8 by default
 (modify-coding-system-alist 'file "\.org\'" 'utf-8)
 
