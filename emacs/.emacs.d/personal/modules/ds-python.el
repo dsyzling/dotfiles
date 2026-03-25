@@ -473,6 +473,16 @@ environment variables etc."
               (load proj-file)))))))
 
 ;;
+;; Sometimes uv-mode-root is correct the previous pyvenv has been activated.
+;; This seems to work when switching between projects and one of them is a
+;; dev reference. If this situation occurs this function can be called
+;; to activate the correct environment for the current project.
+;;
+(defun ds-uv-mode-activate-project-env()
+  (interactive)
+  (pyvenv-activate (concat (uv-mode-root) ".venv")))
+
+;;
 ;; uv package for interacting with uv - add packages etc.
 ;;   https://github.com/johannes-mueller/uv.el
 ;; On my laptop this fails due to tomlparse package not being available when
