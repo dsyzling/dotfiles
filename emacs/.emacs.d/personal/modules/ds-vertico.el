@@ -11,6 +11,8 @@
 ;; e.g. 'c' for class.
 ;;  see: consult-narrow-key
 ;;
+;; When using vertico - M-RET can be used to use the text rather than the completion.
+;;
 
 ;;; Commentary:
 
