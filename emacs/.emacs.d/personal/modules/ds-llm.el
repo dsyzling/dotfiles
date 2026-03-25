@@ -110,5 +110,10 @@
 ;; set default model
 (setq chatgpt-shell-model-version "gemini-2.0-flash")
 
+;;
+;; Claude code within a vterm under Emacs.
+;;
+;; (require 'ds-claude)
+
 
 (provide 'ds-llm)
