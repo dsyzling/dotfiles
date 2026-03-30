@@ -113,7 +113,7 @@
 ;;
 ;; Claude code within a vterm under Emacs.
 ;;
-;; (require 'ds-claude)
+(require 'ds-claude)
 
 
 (provide 'ds-llm)
