@@ -16,6 +16,36 @@
 (prefer-coding-system        'utf-8)
 (set-input-method nil)
 
+;; disable bidirectional scanning - we're left to right.
+(setq-default bidi-display-reordering 'left-to-right
+              bidi-paragraph-direction 'left-to-right)
+(setq bidi-inhibit-bpa t)
+
+;; defer fontification until you stop typing.
+(setq redisplay-skip-fontification-on-input t)
+
+;; don't draw cursor in active windows.
+(setq-default cursor-in-non-selected-windows nil)
+(setq highlight-nonselected-windows nil)
+
+;; auto chmod +x a script if it has #!
+(add-hook 'after-save-hook
+          #'executable-make-buffer-file-executable-if-script-p)
+
+;; toggle to single window and then back to the previous window
+;; configuration.
+(winner-mode +1)
+
+(defun toggle-delete-other-windows ()
+  "Delete other windows in frame if any, or restore previous window config."
+  (interactive)
+  (if (and winner-mode
+           (equal (selected-window) (next-window)))
+      (winner-undo)
+    (delete-other-windows)))
+
+(global-set-key (kbd "C-x 1") #'toggle-delete-other-windows)
+
 ;; Use this only on laptops...
 (unless (string-match-p "^Power N/A" (battery))
   ;; it's nice to know how much power you have
