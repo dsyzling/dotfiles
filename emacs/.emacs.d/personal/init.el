@@ -621,6 +621,11 @@
 ;;
 
 ;;
+;; Shell ghostty inside emacs
+;;
+(use-package ghostel
+  :ensure t)
+;;
 ;; global keys
 ;;
 ;; reindent automatically when return is pressed
