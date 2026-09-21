@@ -294,20 +294,54 @@
 ;; use lsp-mode for scala, python etc.
 ;;
 ;; Enable nice rendering of diagnostics like compile errors.
+;;
+;; See the following for configuration:
+;;  https://emacsredux.com/blog/2026/07/29/flycheck-38/
+;;
 (use-package flycheck
   :ensure t
   :config
   ;; (setq flycheck-check-syntax-automatically nil)
   ;; Override default column width for filename 6 -> 12
   (setq flycheck-error-list-format
-      `[("File" 12)
-        ("Line" 5 flycheck-error-list-entry-< :right-align t)
-        ("Col" 3 nil :right-align t)
-        ("Level" 8 flycheck-error-list-entry-level-<)
-        ("ID" 35 flycheck-error-list-entry-level-<)
-        (,(flycheck-error-list-make-last-column "Message" 'Checker) 0 t)])
+        `[("File" 12)
+          ("Line" 5 flycheck-error-list-entry-< :right-align t)
+          ("Col" 3 nil :right-align t)
+          ("Level" 8 flycheck-error-list-entry-level-<)
+          ("ID" 35 flycheck-error-list-entry-level-<)
+          (,(flycheck-error-list-make-last-column "Message" 'Checker) 0 t)]
+        flycheck-annotate-current-line-style 'below
+        flycheck-annotate-other-lines-style nil
+        flycheck-annotate-suppress-echo t)
 
-  :init (global-flycheck-mode))
+  ;; enable checking everywhere
+  (global-flycheck-mode)
+  ;; show errors inline below the line at point
+  (global-flycheck-annotate-mode)
+
+  (global-flycheck-lsp-mode)
+
+  ;; flycheck-lsp drops the LSP diagnostic's :source; put it back in the
+  ;; message so ruff's diagnostics can be told apart from lsp-mode's (pyright).
+  (defun ds/flycheck-lsp-tag-source (fn lsp &rest args)
+    (let ((err (apply fn lsp args))
+          (source (plist-get lsp :source)))
+      (when (and source (flycheck-error-message err))
+        (setf (flycheck-error-message err)
+              (format "[%s] %s" source (flycheck-error-message err))))
+      err))
+  (advice-add 'flycheck-lsp--diagnostic->error :around #'ds/flycheck-lsp-tag-source)
+  )
+
+;;
+;; Ensure flycheck configured checkers are executed alongside the standard
+;; lsp server - i.e. for Python Ruff and lsp (pyright) messages are combined.
+;;
+(with-eval-after-load 'lsp-mode
+  (require 'lsp-diagnostics)
+  (lsp-diagnostics-lsp-checker-if-needed) ; defines the `lsp' checker lazily
+  ;; (t . ...) = run flycheck-lsp (ruff) even when lsp already reported errors
+  (flycheck-add-next-checker 'lsp '(t . flycheck-lsp)))
 
 ;; position flycheck messages buffer
 (setq display-buffer-alist
@@ -410,7 +444,7 @@
   :hook (lsp-mode . lsp-ui-mode)
   :init
   (setq lsp-ui-peek-enable t
-        lsp-ui-sideline-enable t
+        lsp-ui-sideline-enable nil
         lsp-ui-imenu-enable t
         lsp-ui-doc-position 'at-point
         lsp-ui-doc-include-signature t

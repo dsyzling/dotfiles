@@ -599,24 +599,33 @@ Lists the object's non-method fields and their respective current values."
 ;; (setf (flycheck-checker-get 'python-flake8 'next-checkers) nil)
 ;; we can use this approach in multiple language modes.
 ;; from https://github.com/flycheck/flycheck/issues/1762
-(defvar-local my/flycheck-local-cache nil)
-
-(defun my/flycheck-checker-get (fn checker property)
-  (or (alist-get property (alist-get checker my/flycheck-local-cache))
-      (funcall fn checker property))) 
-
-(advice-add 'flycheck-checker-get :around 'my/flycheck-checker-get)
-
-(add-hook 'lsp-managed-mode-hook
-          (lambda ()
-            (when (or  (derived-mode-p 'python-ts-mode) (derived-mode-p 'python-mode))
-              (setq-local flycheck-python-mypy-config "pyproject.toml")
-              (setq my/flycheck-local-cache
-                    '((lsp . ((next-checkers . (python-ruff))))))
-              )))
 
 
-(defvar ds/lsp-flycheck-checkers (ht))
+;; This is my old configuration to ensure that Ruff is called as well
+;; as pyright and both sets of errors/warnings are displayed.
+;; flycheck can now be configured with default lsp servers and this
+;; is controlled within init.el
+;; -----
+;; (defvar-local my/flycheck-local-cache nil)
+
+;; (defun my/flycheck-checker-get (fn checker property)
+;;   (or (alist-get property (alist-get checker my/flycheck-local-cache))
+;;       (funcall fn checker property))) 
+
+;; (advice-add 'flycheck-checker-get :around 'my/flycheck-checker-get)
+
+;; (add-hook 'lsp-managed-mode-hook
+;;           (lambda ()
+;;             (when (or  (derived-mode-p 'python-ts-mode) (derived-mode-p 'python-mode))
+;;               (setq-local flycheck-python-mypy-config "pyproject.toml")
+;;               (setq my/flycheck-local-cache
+;;                     '((lsp . ((next-checkers . (python-ruff))))))
+;;               )))
+
+
+;; (defvar ds/lsp-flycheck-checkers (ht))
+;; --------
+
 
 (defun ds-python-use-pyls ()
   "Override priority of registered python servers and use Palentir pyls by default."

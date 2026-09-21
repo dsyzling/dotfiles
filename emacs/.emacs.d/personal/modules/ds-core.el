@@ -161,11 +161,6 @@
 ;; common programming defaults.
 ;;
 
-;; enable on-the-fly syntax checking
-(if (fboundp 'global-flycheck-mode)
-    (global-flycheck-mode +1)
-  (add-hook 'prog-mode-hook 'flycheck-mode))
-
 ;; font-lock annotations like TODO in source code
 (use-package hl-todo :ensure t)
 (require 'hl-todo)
