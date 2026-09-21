@@ -314,6 +314,16 @@
 ;; treesitter
 ;; auto configure and install treesitter language files
 ;;
+(use-package treesit-auto
+  :straight (:host github :repo "renzmann/treesit-auto")
+  :config
+  (setq treesit-auto-install 'prompt)
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode)
+  ;; Enhanced syntax highlighting
+  (setq treesit-font-lock-level 4)
+  ;; (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
+  )
 ;; Disabled for now - there are too many issues interfering with
 ;; common workflows. The latest was no HTML treesitter mode and then
 ;; not falling back to the standard html-mode.
