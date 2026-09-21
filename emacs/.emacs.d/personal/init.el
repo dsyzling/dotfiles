@@ -159,6 +159,14 @@
 (setopt magit-format-file-function #'magit-format-file-all-the-icons) 
 
 ;;
+;; from magit-status type ,
+;; or M-x magit-gh
+;;
+(use-package magit-gh
+  :ensure t
+  :after magit)
+
+;;
 ;; Forge for working with PRs etc. on Github/Gitlab
 ;;
 ;; Setup for github requires access tokens
