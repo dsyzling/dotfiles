@@ -600,6 +600,16 @@
 ;;
 (require 'ds-llm)
 
+;;
+;; Bicep mode - based on treesitter
+;;
+(use-package bicep-ts-mode
+  :ensure t
+  :vc ( :url "https://github.com/josteink/bicep-ts-mode"
+        :rev :newest))
+(add-to-list 'auto-mode-alist '("\\.bicep\\'" . bicep-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.bicepparam\\'" . bicep-ts-mode))
+
 ;; pyls appears to have some terrible performance problems and issues
 ;; - goto definition not working reliably, so for now use the Microsoft
 ;; server by default.
