@@ -54,68 +54,6 @@ your changes for mypy diagnostics to update correctly."
 
 (add-hook 'before-save-hook #'ds/python-mode-before-save-hook)
 
-;; ;; Copy pasted from ruby-mode.el
-;; (defun prelude-python--encoding-comment-required-p ()
-;;   (re-search-forward "[^\0-\177]" nil t))
-
-;; (defun prelude-python--detect-encoding ()
-;;   (let ((coding-system
-;;          (or save-buffer-coding-system
-;;              buffer-file-coding-system)))
-;;     (if coding-system
-;;         (symbol-name
-;;          (or (coding-system-get coding-system 'mime-charset)
-;;              (coding-system-change-eol-conversion coding-system nil)))
-;;       "ascii-8bit")))
-
-;; (defun prelude-python--insert-coding-comment (encoding)
-;;   (let ((newlines (if (looking-at "^\\s *$") "\n" "\n\n")))
-;;     (insert (format "# coding: %s" encoding) newlines)))
-
-;; (defun prelude-python-mode-set-encoding ()
-;;   "Insert a magic comment header with the proper encoding if necessary."
-;;   (save-excursion
-;;     (widen)
-;;     (goto-char (point-min))
-;;     (when (prelude-python--encoding-comment-required-p)
-;;       (goto-char (point-min))
-;;       (let ((coding-system (prelude-python--detect-encoding)))
-;;         (when coding-system
-;;           (if (looking-at "^#!") (beginning-of-line 2))
-;;           (cond ((looking-at "\\s *#\\s *.*\\(en\\)?coding\\s *:\\s *\\([-a-z0-9_]*\\)")
-;;                  ;; update existing encoding comment if necessary
-;;                  (unless (string= (match-string 2) coding-system)
-;;                    (goto-char (match-beginning 2))
-;;                    (delete-region (point) (match-end 2))
-;;                    (insert coding-system)))
-;;                 ((looking-at "\\s *#.*coding\\s *[:=]"))
-;;                 (t (prelude-python--insert-coding-comment coding-system)))
-;;           (when (buffer-modified-p)
-;;             (basic-save-buffer-1)))))))
-
-;; (when (fboundp 'exec-path-from-shell-copy-env)
-;;   (exec-path-from-shell-copy-env "PYTHONPATH"))
-
-;; (defun ds-python-mode-defaults ()
-;;   "Defaults for Python programming."
-;;   (subword-mode +1)
-;;   ;; (eldoc-mode 1)
-;;   (setq-local electric-layout-rules
-;;               '((?: . (lambda ()
-;;                         (and (zerop (first (syntax-ppss)))
-;;                              (python-info-statement-starts-block-p)
-;;                              'after)))))
-;;   (when (fboundp #'python-imenu-create-flat-index)
-;;     (setq-local imenu-create-index-function
-;;                 #'python-imenu-create-flat-index))
-;;   (add-hook 'post-self-insert-hook
-;;             #'electric-layout-post-self-insert-function nil 'local)
-;;   (add-hook 'after-save-hook 'prelude-python-mode-set-encoding nil 'local))
-
-;; (setq ds-python-mode-hook 'ds-python-mode-defaults)
-
-;; (add-hook 'python-mode-hook (lambda ()
-;;                               (run-hooks 'ds-python-mode-hook)))
 
 ;; Using elpy with lsp-mode for our python
 (use-package elpy
@@ -342,37 +280,6 @@ this with pprint pp."
 ;;   (define-key importmagic-mode-map (kbd "C-c C-l") 'importmagic-fix-symbol-at-point)
 ;;   (add-hook 'python-mode-hook 'importmagic-mode))
 
-;;
-;; This is my older implementation of using the MS Python Server.
-;;
-;;(add-hook 'python-mode-hook 'lsp)
-;; Linux laptop location for MS Python Server
-;; (when (eq system-type 'gnu/linux)
-;;   (setq ms-pyls-dir
-;;         (expand-file-name "~/projects/python/python-language-server/output/bin/Release/")))
-
-;;
-;; Register Microsoft Python Language server for lsp
-;;
-;; (load "~/.emacs.d/personal/modules/lsp-ms-python.el")
-;; (require 'lsp-ms-python)
-
-;;
-;; lsp-python-ms - implementation currently linked from the main lsp-mode project.
-;;
-;; Compiling the Microsoft Python language Server
-;;  cd python-language-server/src/LanguageServer/Impl
-;;  dotnet build -c Release
-;;
-;; (when (eq system-type 'gnu/linux)
-;;   (setq lsp-python-ms-executable
-;;         (expand-file-name "~/projects/python/python-language-server/output/bin/Release/Microsoft.Python.LanguageServer")))
-
-;; (use-package lsp-python-ms
-;;   :ensure t
-;;   :hook (python-mode . (lambda ()
-;;                          (require 'lsp-python-ms)
-;;                          (lsp))))  ; or lsp-deferred
 
 ;;
 ;; Use pyright - replacement for Microsoft Python Language Server.
@@ -572,68 +479,13 @@ Lists the object's non-method fields and their respective current values."
 ;; | C-c C-y e | eval current statement - useful to eval current line or function     |
 ;; | C-c C-y s | eval top statement or enclosing scope - useful for function or class |
 
-;;
-;; Using python-ruff after lsp diagnostic for flycheck.
-;;
-
-;; Customise flycheck.
-;; Conda on Windows has already moved to using python rather than python3
-;; within environments, flycheck defaults to using python3 so we need to
-;; customise linters.
-;; (setq-default flycheck-python-flake8-executable "python")
-;; (setq-default flycheck-python-pylint-executable "python")
-
-;; Customise flycheck checkers used within specific language modes.
-;; For python when using pyright we'll chain flake8 and mypy.
-;;TODO - move flycheck-local-cache and functions to a common area so
-;; leaving these functions examples in case we need them in future.
-;; (add-to-list 'flycheck-disabled-checkers 'python-pylint)
-;; (add-to-list 'flycheck-disabled-checkers 'python-pycompile)
-;;(add-to-list 'flycheck-disabled-checkers 'python-mypy)
-;; (setq my/flycheck-local-cache
-;;       '((python-pylint . ((next-checkers . ())))))
-;; (setf (flycheck-checker-get 'python-flake8 'next-checkers) nil)
-;; (setq my/flycheck-local-cache
-;;       '((lsp . ((next-checkers . (python-flake8 python-mypy))))))
-;; (setf (flycheck-checker-get 'python-flake8 'next-checkers) '(python-mypy))
-;; (setf (flycheck-checker-get 'python-flake8 'next-checkers) nil)
-;; we can use this approach in multiple language modes.
-;; from https://github.com/flycheck/flycheck/issues/1762
-
-
-;; This is my old configuration to ensure that Ruff is called as well
-;; as pyright and both sets of errors/warnings are displayed.
-;; flycheck can now be configured with default lsp servers and this
-;; is controlled within init.el
-;; -----
-;; (defvar-local my/flycheck-local-cache nil)
-
-;; (defun my/flycheck-checker-get (fn checker property)
-;;   (or (alist-get property (alist-get checker my/flycheck-local-cache))
-;;       (funcall fn checker property))) 
-
-;; (advice-add 'flycheck-checker-get :around 'my/flycheck-checker-get)
-
-;; (add-hook 'lsp-managed-mode-hook
-;;           (lambda ()
-;;             (when (or  (derived-mode-p 'python-ts-mode) (derived-mode-p 'python-mode))
-;;               (setq-local flycheck-python-mypy-config "pyproject.toml")
-;;               (setq my/flycheck-local-cache
-;;                     '((lsp . ((next-checkers . (python-ruff))))))
-;;               )))
-
-
-;; (defvar ds/lsp-flycheck-checkers (ht))
-;; --------
 
 
 (defun ds-python-use-pyls ()
   "Override priority of registered python servers and use Palentir pyls by default."
   (interactive)
   (setf (lsp--client-priority (ht-get lsp-clients 'pyls)) 0)
-  (setf (lsp--client-priority (ht-get lsp-clients 'mspyls)) -2)
-  
-  (ht-remove ds/lsp-flycheck-checkers 'python-mode))
+  (setf (lsp--client-priority (ht-get lsp-clients 'mspyls)) -2))
 
 
 (defun ds-python-use-mspyls ()
@@ -642,46 +494,6 @@ Lists the object's non-method fields and their respective current values."
   (setf (lsp--client-priority (ht-get lsp-clients 'pyls)) -1)
   (setf (lsp--client-priority (ht-get lsp-clients 'mspyls)) 0))
 
-;;
-;; Provide our own lsp-flycheck-add-mode function which allows us to
-;; support the MS Python Language Server along with flake8 and mypy
-;; running controlled by flycheck.
-;; Lsp curretly assumes that the language server provides all linting and syntax
-;; diagnostics. Pyls does this by adding/enabling plugins for flake8, pylint
-;; etc. and then generating errors/warnings through lsp diagnostic messages.
-;; mspyls doesn't do this expecting the client to add further linting.
-;; We support this by modifying the flycheck checker chain and chaining our
-;; linters first finishing with lsp to provide MS diagnostic messages.
-;;
-;; Switch to use mspyls with M-x ds-python-use-mspyls.
-;; This will setup a flycheck chain:
-;;  python-flake8 -> lsp -> python-mypy
-;;
-;; (with-eval-after-load 'lsp-mode
-;;   (defun lsp-flycheck-add-mode (mode)
-;;     "Register flycheck support for MODE."
-;;     (unless (flycheck-checker-supports-major-mode-p 'lsp mode)
-;;       (flycheck-add-mode 'lsp mode))
-;;     (when (eq mode 'python-mode)
-;;       ;; setup chain of checkers - flake8 -> mypy -> lsp
-;;       (setf (flycheck-checker-get 'python-flake8 'next-checkers) nil)
-;;       (setf (flycheck-checker-get 'lsp 'next-checkers) nil)
-;;       (flycheck-add-next-checker 'python-flake8 'lsp)
-;;       (flycheck-add-next-checker 'python-flake8 'python-mypy)
-;;       (setq-local flycheck-checker 'python-flake8))
-;; ))
-
-;; TODO Testing a new version, we can remove this version when I know this works
-;; reliably.
-;;
-;; (defun ds-python-run-script ()
-;;   "Run the python script in the current buffer, output will be written to a compilation buffer."
-;;   (interactive)
-;;   (let* ((root (lsp-workspace-root))
-;;          (current-file (expand-file-name (buffer-file-name)))
-;;          (cmd (format "python -c \"import sys;import runpy;sys.path.append('%s');runpy.run_path('%s', run_name='__main__')\""
-;;                       root current-file)))
-;;     (compile cmd)))
 
 (defun ds/quoteStr (v)
   (format "'%s'" v))
