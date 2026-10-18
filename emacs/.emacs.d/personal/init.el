@@ -480,6 +480,18 @@
   :ensure t)
 
 ;;
+;; Markdown modern - render markdown inline within the buffer.
+;; M-x markdown-modern-install-grammars after install
+;; another alternative is:
+;; https://github.com/Thysrael/markdown-ts-appear
+;;
+(package-vc-install
+ '(markdown-modern
+   :url "https://github.com/rjprins/markdown-modern"
+   :lisp-dir "lisp"))
+(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-modern-mode))
+
+;;
 ;; Use dape for debugging rather than dap-debug.
 ;; dap-mode has issues dealing with hierarchical debugging in Python/debugpy
 ;;
