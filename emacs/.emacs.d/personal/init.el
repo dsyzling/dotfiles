@@ -485,11 +485,17 @@
 ;; another alternative is:
 ;; https://github.com/Thysrael/markdown-ts-appear
 ;;
-(package-vc-install
- '(markdown-modern
-   :url "https://github.com/rjprins/markdown-modern"
-   :lisp-dir "lisp"))
-(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-modern-mode))
+(use-package markdown-modern
+  :vc (:url "https://github.com/rjprins/markdown-modern"
+       :lisp-dir "lisp"
+       :rev :newest)
+  :mode ("\\.md\\'" . markdown-modern-mode))
+
+;; (package-vc-install
+;;  '(markdown-modern
+;;    :url "https://github.com/rjprins/markdown-modern"
+;;    :lisp-dir "lisp"))
+;; (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-modern-mode))
 
 ;;
 ;; Use dape for debugging rather than dap-debug.
